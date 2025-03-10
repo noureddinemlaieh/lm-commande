@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id           String   @id @default(cuid())
+  name         String
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  postalCode   String?
+  country      String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Product {
+  id           String           @id @default(cuid())
+  name         String
+  description  String?
+  cost         Float
+  unit         String?
+  reference    String?
+  sellingPrice Float
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  category     ProductCategory
+}
+
+enum ProductCategory {
+  MATERIAL
+  SERVICE
+  PRODUCT
+}
+
+enum DevisStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  CANCELLED
+} 
