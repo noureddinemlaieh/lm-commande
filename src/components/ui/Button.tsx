@@ -23,4 +23,7 @@ export function Button({
       {children}
     </button>
   )
-} 
+}
+
+// Fichier de compatibilité pour les importations en minuscules
+export { Button } from './Button'; 
