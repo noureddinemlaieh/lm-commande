@@ -1,0 +1,599 @@
+{
+  "name": "CATALOGUE  LEROY MERLIN 2025",
+  "description": "",
+  "categories": [
+    {
+      "name": "CHANTIER",
+      "order": 0,
+      "services": [
+        {
+          "name": "Mise en protection et ménage de fin des travaux",
+          "description": "Mise en protection et ménage de fin des travaux",
+          "price": 139.76,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": [
+            {
+              "name": "Bâche de protection plastifiée MULTIPLAST, L.10 x l.0.9 m",
+              "quantity": 1,
+              "price": 24,
+              "unit": "u",
+              "reference": "82505702",
+              "toChoose": false
+            },
+            {
+              "name": "Sac à gravats lot de 20 sacs à gravats H.100 x l.60 cm x Ep.120 µm blanc",
+              "quantity": 1,
+              "price": 7,
+              "unit": "u",
+              "reference": "88110778",
+              "toChoose": false
+            },
+            {
+              "name": "Ruban de masquage DEXTER l.48 mm x L.25 m surfaces lisses bleu",
+              "quantity": 1,
+              "price": 6.66,
+              "unit": "u",
+              "reference": "86904489",
+              "toChoose": false
+            },
+            {
+              "name": "Rouleau de bâche de protection DEXTER, L.15 x l.3 m",
+              "quantity": 1,
+              "price": 14,
+              "unit": "u",
+              "reference": "82261734",
+              "toChoose": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DEPOSE",
+      "order": 0,
+      "services": [
+        {
+          "name": "Dépose d'étagère",
+          "description": "Dépose d'étagère",
+          "price": 12.86,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'une baignoire en fonte et sa robinetterie",
+          "description": "Dépose d'une baignoire en fonte et sa robinetterie",
+          "price": 309.44,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un pare baignoire",
+          "description": "Dépose d'un pare baignoire",
+          "price": 75.43,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'une baignoire en acrylique ou en acier et sa robinetterie",
+          "description": "Dépose d'une baignoire en acrylique ou en acier et sa robinetterie",
+          "price": 213.02,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose pour réutilisation d'un pare baignoire",
+          "description": "Dépose pour réutilisation d'un pare baignoire",
+          "price": 51.43,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un radiateur à eau en acier",
+          "description": "Dépose d'un radiateur à eau en acier",
+          "price": 134.72,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un radiateur à eau en fonte",
+          "description": "Dépose d'un radiateur à eau en fonte",
+          "price": 182.84,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un radiateur ou d'un sèche-serviette électrique",
+          "description": "Dépose d'un radiateur ou d'un sèche-serviette électrique",
+          "price": 42.14,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose pour réutilisation d'un radiateur à eau en acier",
+          "description": "Dépose pour réutilisation d'un radiateur à eau en acier",
+          "price": 134.72,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un meuble vasque",
+          "description": "Dépose d'un meuble vasque",
+          "price": 37.71,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose pour réutilisation d'un WC suspendu",
+          "description": "Dépose pour réutilisation d'un WC suspendu",
+          "price": 132.02,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'une meuble double vasque",
+          "description": "Dépose d'une meuble double vasque",
+          "price": 75.43,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose de miroir rétro-éclairé",
+          "description": "Dépose de miroir rétro-éclairé",
+          "price": 28.93,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose de miroir rétro-éclairé",
+          "description": "Dépose de miroir rétro-éclairé",
+          "price": 28.93,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose de chape",
+          "description": "Dépose de chape",
+          "price": 32.14,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Création d'une tête de cloison",
+          "description": "Création d'une tête de cloison",
+          "price": 178.57,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose de carrelage au sol",
+          "description": "Dépose de carrelage au sol",
+          "price": 25.71,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose de carrelage mural",
+          "description": "Dépose de carrelage mural",
+          "price": 32.14,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un receveur et de sa robinetterie",
+          "description": "Dépose d'un receveur et de sa robinetterie",
+          "price": 174.72,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose pour réutilisation d'un receveur et sa robinetterie",
+          "description": "Dépose pour réutilisation d'un receveur et sa robinetterie",
+          "price": 220.22,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un receveur à carreler et de sa robinetterie",
+          "description": "Dépose d'un receveur à carreler et de sa robinetterie",
+          "price": 254.07,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un bloc porte en bois",
+          "description": "Dépose d'un bloc porte en bois",
+          "price": 106,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un bidet",
+          "description": "Dépose d'un bidet",
+          "price": 93.94,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'accessoires (miroir, porte serviette)",
+          "description": "Dépose d'accessoires (miroir, porte serviette)",
+          "price": 12.86,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'applique murale",
+          "description": "Dépose d'applique murale",
+          "price": 23.79,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un chauffe-eau d'une capacité inférieure à 100 litres",
+          "description": "Dépose d'un chauffe-eau d'une capacité inférieure à 100 litres",
+          "price": 168.57,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'électroménager",
+          "description": "Dépose d'électroménager",
+          "price": 65,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose de cloison en plaque de plâtre, sur ossature métallique, ép. <= 0.10 m",
+          "description": "Dépose de cloison en plaque de plâtre, sur ossature métallique, ép. <= 0.10 m",
+          "price": 32.14,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose de cloisons en briques, carreaux de plâtre ou béton cellulaire",
+          "description": "Dépose de cloisons en briques, carreaux de plâtre ou béton cellulaire",
+          "price": 38.57,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un WC au sol",
+          "description": "Dépose d'un WC au sol",
+          "price": 107.56,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un WC suspendu",
+          "description": "Dépose d'un WC suspendu",
+          "price": 192.02,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un WC broyeur",
+          "description": "Dépose d'un WC broyeur",
+          "price": 107.56,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose pour réutilisation d'un WC au sol",
+          "description": "Dépose pour réutilisation d'un WC au sol",
+          "price": 79.56,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose pour réutilisation d'un WC suspendu",
+          "description": "Dépose pour réutilisation d'un WC suspendu",
+          "price": 132.02,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose pour réutilisation d'une cuvette de WC suspendu",
+          "description": "Dépose pour réutilisation d'une cuvette de WC suspendu",
+          "price": 106.3,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'un faux plafond",
+          "description": "Dépose d'un faux plafond",
+          "price": 35.36,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        },
+        {
+          "name": "Dépose d'une prise",
+          "description": "Dépose d'une prise",
+          "price": 22.11,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": []
+        }
+      ]
+    },
+    {
+      "name": "CARRELAGE",
+      "order": 0,
+      "services": [
+        {
+          "name": "Pose de carrelage sol",
+          "description": "Pose de carrelage sol",
+          "price": 60.71,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": [
+            {
+              "name": "Ragréage fibré hautes performances PRB - 30 kg",
+              "quantity": 1,
+              "price": 29.9,
+              "unit": "u",
+              "reference": null,
+              "toChoose": false
+            },
+            {
+              "name": "Colle en poudre sol/mur, intérieur/extérieur, max 60x60cm, blanc AXTON 25KG",
+              "quantity": 1,
+              "price": 20,
+              "unit": "u",
+              "reference": "88318300",
+              "toChoose": false
+            },
+            {
+              "name": "Joint en poudre pour carrelage 2 kg - couleur à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 17.25,
+              "unit": "u",
+              "reference": null,
+              "toChoose": false
+            },
+            {
+              "name": "Joint en poudre pour carrelage 5 kg - couleur à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 24.88,
+              "unit": "u",
+              "reference": null,
+              "toChoose": false
+            },
+            {
+              "name": "Joint en poudre pour carrelage 10 kg - couleur à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 30.63,
+              "unit": "u",
+              "reference": null,
+              "toChoose": false
+            },
+            {
+              "name": "Carrelage - à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 16.95,
+              "unit": "m²",
+              "reference": "12359",
+              "toChoose": false
+            },
+            {
+              "name": "Barre de seuil de jonction même niveau - à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 7.99,
+              "unit": "u",
+              "reference": "12350",
+              "toChoose": false
+            },
+            {
+              "name": "Barre de seuil de jonction niveau rattrapage de niveau - à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 7.99,
+              "unit": "u",
+              "reference": "12351",
+              "toChoose": false
+            },
+            {
+              "name": "Barre de seuil d'arrêt - à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 7.99,
+              "unit": "u",
+              "reference": "12349",
+              "toChoose": false
+            },
+            {
+              "name": "Kit 100 croisillons autonivelants et 100 cales DEXTER, Ep.2 mm",
+              "quantity": 1,
+              "price": 16.58,
+              "unit": "u",
+              "reference": "86612847",
+              "toChoose": false
+            },
+            {
+              "name": "Enlève voile de ciment 2.5 l AXTON",
+              "quantity": 1,
+              "price": 13.25,
+              "unit": "u",
+              "reference": "81976736",
+              "toChoose": false
+            }
+          ]
+        },
+        {
+          "name": "Pose carrelage mural",
+          "description": null,
+          "price": 63,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": [
+            {
+              "name": "Kit imperméabilisation mur, sol et angle AXTON 7KG",
+              "quantity": 1,
+              "price": 58.25,
+              "unit": "u",
+              "reference": "88318426",
+              "toChoose": false
+            },
+            {
+              "name": "Colle en poudre sol/mur, intérieur/extérieur, max 60x60cm, blanc AXTON 25KG",
+              "quantity": 1,
+              "price": 20,
+              "unit": "u",
+              "reference": "88318300",
+              "toChoose": false
+            },
+            {
+              "name": "Joint en poudre pour carrelage 2 kg - couleur à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 17.25,
+              "unit": "u",
+              "reference": null,
+              "toChoose": false
+            },
+            {
+              "name": "Joint en poudre pour carrelage 5 kg - couleur à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 24.88,
+              "unit": "u",
+              "reference": null,
+              "toChoose": false
+            },
+            {
+              "name": "Joint en poudre pour carrelage 10 kg - couleur à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 30.63,
+              "unit": "u",
+              "reference": null,
+              "toChoose": false
+            },
+            {
+              "name": "Carrelage mural - à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 16.95,
+              "unit": "m²",
+              "reference": null,
+              "toChoose": false
+            },
+            {
+              "name": "Kit 100 croisillons autonivelants et 100 cales DEXTER, Ep.2 mm",
+              "quantity": 1,
+              "price": 16.58,
+              "unit": "u",
+              "reference": "86612847",
+              "toChoose": false
+            },
+            {
+              "name": "Baguette de finition de l'épaisseur du revêtement",
+              "quantity": 1,
+              "price": 2.78,
+              "unit": "ml",
+              "reference": "12345",
+              "toChoose": false
+            },
+            {
+              "name": "Enlève voile de ciment 2.5 l AXTON",
+              "quantity": 1,
+              "price": 13.25,
+              "unit": "u",
+              "reference": "81976736",
+              "toChoose": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PLOMBERIE",
+      "order": 0,
+      "services": []
+    },
+    {
+      "name": "ÉLECTRICITÉ",
+      "order": 0,
+      "services": []
+    },
+    {
+      "name": "PEINTURE",
+      "order": 0,
+      "services": []
+    },
+    {
+      "name": "MAÇONNERIE",
+      "order": 0,
+      "services": []
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "id": "cm7pd1jrq00m6s9w89ipfge9d",
+  "name": "catalogue leroy merlin",
+  "description": null,
+  "createdAt": "2025-02-28T22:44:08.150Z",
+  "updatedAt": "2025-03-01T18:11:11.783Z",
+  "categories": [
+    {
+      "id": "cm7pd1rrq00m8s9w8a9tou4ek",
+      "name": "catalogue leroy merlin",
+      "description": null,
+      "order": 0,
+      "catalogId": "cm7pd1jrq00m6s9w89ipfge9d",
+      "createdAt": "2025-02-28T22:44:18.518Z",
+      "updatedAt": "2025-02-28T22:44:18.518Z",
+      "services": [
+        {
+          "id": "cm7pd2nhr00mas9w8s402x1vq",
+          "name": "Mise en protection et ménage de fin des travaux",
+          "description": null,
+          "categoryId": "cm7pd1rrq00m8s9w8a9tou4ek",
+          "price": 139.76,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "createdAt": "2025-02-28T22:44:59.632Z",
+          "updatedAt": "2025-02-28T22:44:59.632Z",
+          "materials": [
+            {
+              "id": "cm7pd2nie00mcs9w8syuxqm6y",
+              "name": "Bâche de protection plastifiée MULTIPLAST, L.10 x l.0.9 m",
+              "quantity": 1,
+              "price": 24,
+              "unit": "u",
+              "reference": "82505702"
+            },
+            {
+              "id": "cm7pd2nih00mes9w81jyrbfqv",
+              "name": "Sac à gravats lot de 20 sacs à gravats H.100 x l.60 cm x Ep.120 µm blanc",
+              "quantity": 1,
+              "price": 7,
+              "unit": "u",
+              "reference": "88110778"
+            },
+            {
+              "id": "cm7pd2nij00mgs9w8fsoxbagq",
+              "name": "Rouleau de bâche de protection DEXTER, L.15 x l.3 m",
+              "quantity": 1,
+              "price": 14,
+              "unit": "u",
+              "reference": "82261734"
+            },
+            {
+              "id": "cm7pd2nik00mis9w8zmsxptqc",
+              "name": "Ruban de masquage DEXTER l.48 mm x L.25 m surfaces lisses bleu",
+              "quantity": 1,
+              "price": 6.66,
+              "unit": "u",
+              "reference": "86904489"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cm7q7ok2r0001s9qoh08lcdmc",
+      "name": "CLOISON",
+      "description": null,
+      "order": 0,
+      "catalogId": "cm7pd1jrq00m6s9w89ipfge9d",
+      "createdAt": "2025-03-01T13:01:50.115Z",
+      "updatedAt": "2025-03-01T13:01:50.115Z",
+      "services": [
+        {
+          "id": "cm7q7pvms0003s9qo3hlbmdv3",
+          "name": "Placage BA13",
+          "description": null,
+          "categoryId": "cm7q7ok2r0001s9qoh08lcdmc",
+          "price": 39.29,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "createdAt": "2025-03-01T13:02:51.748Z",
+          "updatedAt": "2025-03-01T13:02:51.748Z",
+          "materials": [
+            {
+              "id": "cm7q859pe0008s9qokx6frapw",
+              "name": "Plaque de plâtre BA 13 H.250 x l.120 cm, hydrofuge verte H1 NF RESI",
+              "quantity": 1,
+              "price": 5.58,
+              "unit": "u",
+              "reference": "80153047"
+            },
+            {
+              "id": "cm7q92u85000ds9qo2h5kqze6",
+              "name": "Colle pour carreaux de plâtre FACILIS, 25 kg",
+              "quantity": 1,
+              "price": 13.75,
+              "unit": "u",
+              "reference": "65183160"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cm7q94910000fs9qoqu3fb8v5",
+      "name": "Electricité",
+      "description": null,
+      "order": 0,
+      "catalogId": "cm7pd1jrq00m6s9w89ipfge9d",
+      "createdAt": "2025-03-01T13:42:01.908Z",
+      "updatedAt": "2025-03-01T13:42:01.908Z",
+      "services": [
+        {
+          "id": "cm7q9eec0000ks9qo6bhlvkvj",
+          "name": "Déplacement d'une prise électrique, point d'éclairage ou interrupteur en cheminement encastré",
+          "description": null,
+          "categoryId": "cm7q94910000fs9qoqu3fb8v5",
+          "price": 130,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "createdAt": "2025-03-01T13:49:55.345Z",
+          "updatedAt": "2025-03-01T13:49:55.345Z",
+          "materials": [
+            {
+              "id": "cm7q9h4ld000ns9qofxvwfrh0",
+              "name": "Boîte d'encastrement étanche à l'air, cloison creuse 1 poste(s), LEGRAN",
+              "quantity": 1,
+              "price": 1.66,
+              "unit": "u",
+              "reference": "73086573"
+            },
+            {
+              "id": "cm7q9iwr5000qs9qohtgr2fr3",
+              "name": "Boîte d'encastrement étanche à l'air, cloison creuse 2 poste(s), LEGRAND",
+              "quantity": 1,
+              "price": 6.58,
+              "unit": "u",
+              "reference": "73086594"
+            },
+            {
+              "id": "cm7q9nhjh000vs9qov561f3hl",
+              "name": "Double prise avec terre, complet, LEGRAND Dooxie, blanc",
+              "quantity": 1,
+              "price": 13.23,
+              "unit": "u",
+              "reference": "83626829"
+            },
+            {
+              "id": "cm7q9ns2n000xs9qootkjjpr2",
+              "name": "Double prise avec terre, complet, LEGRAND Dooxie, blanc",
+              "quantity": 1,
+              "price": 13.23,
+              "unit": "u",
+              "reference": "83626829"
+            },
+            {
+              "id": "cm7q9of9r000zs9qo9fbesw4x",
+              "name": "Câble électrique 3 G 2.5 mm² u1000r2v L.25 m, noir",
+              "quantity": 1,
+              "price": 29.92,
+              "unit": "u",
+              "reference": "70809081"
+            }
+          ]
+        },
+        {
+          "id": "cm7q9rmok0011s9qo74iacdt1",
+          "name": "Déplacement d'une prise électrique, point d'éclairage ou interrupteur en cheminement apparent",
+          "description": null,
+          "categoryId": "cm7q94910000fs9qoqu3fb8v5",
+          "price": 85,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "createdAt": "2025-03-01T14:00:12.693Z",
+          "updatedAt": "2025-03-01T14:00:12.693Z",
+          "materials": [
+            {
+              "id": "cm7q9rxjw0013s9qo6y2k6y9p",
+              "name": "Double prise avec terre, complet, LEGRAND Dooxie, blanc",
+              "quantity": 1,
+              "price": 13.23,
+              "unit": "u",
+              "reference": "83626829"
+            },
+            {
+              "id": "cm7q9s32d0015s9qoht11gy2u",
+              "name": "Prise avec terre en saillie - à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 6.25,
+              "unit": "u",
+              "reference": null
+            },
+            {
+              "id": "cm7q9s55j0017s9qojlywci3d",
+              "name": "Prise avec terre encastrée - à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 3.99,
+              "unit": "u",
+              "reference": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

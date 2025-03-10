@@ -1,0 +1,32 @@
+
+
+
+prendre en compte les 5 % de retenue sur le prix total du devis
+
+Dans la modale de devis ajouter la possiblilité de créer une prestation comme dans matériaux
+Toujours vérifier le type des valeurs avant d'appeler des méthodes spécifiques
+Utiliser des interfaces TypeScript plus strictes. Le code doit etre plus robuste,blindé et sans erreurs 
+
+
+dans devis creation et edition rendre le zero placeholer et permettre l'affichage du virugle dans le champ quantité
+
+Permettre l'ordre de section et matériau dans devis
+
+
+
+
+
+
+          Corriger les avertissements ESLint restants :
+          Préfixer les variables non utilisées avec un underscore (ex: _variable)
+          Remplacer les types any par des types plus spécifiques
+          Ajouter les attributs alt aux balises <img>
+          Échapper les caractères spéciaux dans les chaînes JSX
+          Optimiser les hooks React :
+          Utiliser useCallback pour les fonctions qui sont des dépendances de useEffect
+          Extraire les expressions complexes dans les tableaux de dépendances
+          Améliorer les performances :
+          Remplacer les balises <img> par <Image /> de Next.js pour optimiser le chargement des images
+          Nettoyer le code :
+          Supprimer les imports et variables non utilisés
+          Consolider les fonctions similaires

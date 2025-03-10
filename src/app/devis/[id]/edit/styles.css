@@ -1,0 +1,526 @@
+/* Styles spécifiques pour la page devis */
+
+/* Style pour l'input de référence */
+.reference-input {
+  width: 100px !important;
+  text-align: right;
+  padding: 4px 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Style pour l'alignement des nombres */
+.right-aligned-input {
+  text-align: right !important;
+}
+
+/* Style pour la colonne de référence */
+.reference-column {
+  width: 100px !important;
+  max-width: 100px;
+}
+
+.reference-column input {
+  width: 100% !important;
+  font-size: 0.9em;
+}
+
+/* Style pour le conteneur de référence */
+.reference-container {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 0;
+}
+
+/* Styles pour les inputs de quantité et unité */
+.ant-input-number.w-\[100px\] {
+  width: 100px !important;
+}
+
+.ant-input.w-\[80px\] {
+  width: 80px !important;
+}
+
+/* Centrer le texte dans les inputs */
+.text-center input {
+  text-align: center;
+}
+
+/* Aligner les nombres à droite */
+.ant-input-number input {
+  text-align: right;
+}
+
+/* Ajuster la taille des colonnes du tableau */
+table th, table td {
+  padding: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Style pour le header du tableau */
+table thead th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Styles pour les inputs numériques */
+.ant-input-number {
+  width: 120px !important;
+}
+
+/* Style pour les selects */
+.ant-select {
+  width: 100px !important;
+}
+
+/* Aligner les nombres à droite dans les inputs */
+.ant-input-number-input {
+  text-align: right !important;
+}
+
+/* Centrer le contenu des cellules */
+.text-center .ant-select-selector {
+  text-align: center !important;
+}
+
+/* Ajuster l'espacement des cellules */
+td.py-2 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Style pour la section des matériaux */
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+/* Style pour le bouton collapse */
+button.text-gray-500 {
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style pour la liste des matériaux */
+.pl-8 {
+  border-left: 2px dashed #e5e7eb;
+}
+
+/* Style pour les points des matériaux */
+.text-gray-400 {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+/* Style pour la ligne de matériau */
+.flex.items-center.gap-4 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 4px 0;
+}
+
+/* Style pour les champs de matériau */
+.w-\[25\%\] {
+  width: 25% !important;
+}
+
+.w-\[80px\] {
+  width: 80px !important;
+}
+
+.w-\[100px\] {
+  width: 100px !important;
+}
+
+/* Style pour le montant total */
+.text-right {
+  text-align: right;
+  color: #666666;
+  padding-right: 8px;
+}
+
+/* Style pour la section des matériaux */
+.pl-8.py-2 {
+  background-color: #f9fafb;
+  padding: 8px 16px;
+  margin-left: 32px;
+  border-left: 2px dashed #e5e7eb;
+}
+
+/* Styles pour les matériaux */
+.material-row {
+  display: grid;
+  grid-template-columns: 20px 1fr 100px 80px 80px 80px 80px 100px 50px;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0;
+  margin-left: -8px;
+}
+
+.bullet {
+  color: #9CA3AF;
+  padding: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.material-name {
+  width: 100% !important;
+  min-width: unset;
+}
+
+.material-reference {
+  width: 100px !important;
+  text-align: center;
+}
+
+.material-quantity {
+  width: 80px !important;
+  text-align: right;
+}
+
+.material-unit {
+  width: 80px !important;
+}
+
+.price-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.material-price {
+  width: 80px !important;
+  text-align: right;
+}
+
+.currency {
+  color: #6B7280;
+}
+
+.material-tva {
+  width: 80px !important;
+}
+
+.material-total {
+  width: 100px;
+  text-align: right;
+  color: #374151;
+  padding-right: 8px;
+}
+
+.material-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.delete-button {
+  color: #EF4444;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  color: #DC2626;
+}
+
+.add-material-button {
+  color: #3B82F6;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.add-material-button:hover {
+  color: #2563EB;
+}
+
+/* Style pour le select de matériau */
+.material-name.ant-select {
+  width: 100% !important;
+}
+
+.material-name .ant-select-selector {
+  border-radius: 4px !important;
+  height: 32px !important;
+}
+
+.material-name.ant-select-focused .ant-select-selector {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Style pour les options du select */
+.ant-select-dropdown {
+  min-width: 400px !important;
+  max-width: 700px !important;
+}
+
+.ant-select-item-option-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 8px 12px;
+}
+
+/* Styles pour la mise en page du formulaire */
+.p-6 {
+  padding: 1.5rem;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.grid {
+  display: grid;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Style des champs */
+.ant-form-item {
+  margin-bottom: 0;
+}
+
+.ant-form-item-label {
+  padding-bottom: 4px;
+}
+
+.ant-select-selector {
+  height: 32px !important;
+}
+
+.ant-input, .ant-select {
+  width: 100% !important;
+}
+
+/* Ajouter ces styles */
+.flex {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+/* Styles pour la table des matériaux */
+.material-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.material-table th,
+.material-table td {
+  padding: 6px 4px;
+  white-space: nowrap;
+}
+
+.material-table input,
+.material-table .ant-input-number,
+.material-table .ant-select {
+  width: 100% !important;
+  min-width: 0;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+/* Ajustement pour coller les colonnes à droite */
+.material-table th:first-child,
+.material-table td:first-child {
+  width: 70%;
+  max-width: 70%;
+}
+
+/* Réduire les largeurs des autres colonnes */
+.quantity-column {
+  width: 70px !important;
+  max-width: 70px;
+}
+
+.unit-column {
+  width: 60px !important;
+  max-width: 60px;
+}
+
+.price-column {
+  width: 90px !important;
+  max-width: 90px;
+}
+
+.tva-column {
+  width: 70px !important;
+  max-width: 70px;
+}
+
+.billable-column {
+  width: 50px !important;
+  max-width: 50px;
+}
+
+.total-column {
+  width: 80px !important;
+  max-width: 80px;
+}
+
+.action-column {
+  width: 30px !important;
+  max-width: 30px;
+  padding: 0 !important;
+}
+
+/* Améliorer l'apparence des inputs */
+.material-table input,
+.material-table .ant-select-selector,
+.material-table .ant-input-number {
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+}
+
+.material-table input:hover,
+.material-table .ant-select-selector:hover,
+.material-table .ant-input-number:hover {
+  border-color: #40a9ff;
+}
+
+.material-table input:focus,
+.material-table .ant-select-selector:focus,
+.material-table .ant-input-number-focused {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Amélioration pour la colonne Nom */
+.material-table th:first-child,
+.material-table td:first-child {
+  width: 40%;
+  max-width: 40%;
+}
+
+/* Ajustement pour l'input de la colonne Nom */
+.material-table td:first-child input {
+  width: 100% !important;
+}
+
+/* Réduire la taille de la colonne d'action */
+.action-column {
+  width: 40px !important;
+  min-width: 40px;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Améliorer l'apparence du bouton de suppression */
+.action-column button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.action-column button:hover {
+  background-color: #fee2e2;
+}
+
+/* Améliorer l'apparence des inputs numériques */
+.ant-input-number-group-wrapper {
+  width: 100% !important;
+}
+
+.price-column .ant-input-number-group-addon {
+  padding: 0 8px;
+}
+
+/* Style pour le sélecteur de matériaux */
+.material-selector {
+  width: 100% !important;
+}
+
+.material-selector .ant-select-selector {
+  border: none !important;
+  background-color: transparent !important;
+  color: #3B82F6 !important;
+  padding-left: 0 !important;
+  height: 32px !important;
+}
+
+.material-selector .ant-select-selection-placeholder {
+  color: #3B82F6 !important;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.material-selector .ant-select-selection-placeholder::before {
+  content: "+";
+  margin-right: 4px;
+  font-size: 16px;
+}
+
+.material-selector .ant-select-arrow {
+  color: #3B82F6 !important;
+}
+
+.material-selector:hover .ant-select-selection-placeholder,
+.material-selector:hover .ant-select-arrow {
+  color: #2563EB !important;
+}
+
+/* Ajouter un style pour le survol des options */
+.ant-select-item-option:hover {
+  background-color: #f0f7ff;
+}
+
+/* Style pour le dropdown d'ajout de prestation */
+.ant-select-dropdown-placement-bottomLeft {
+  min-width: 700px !important;
+  width: 700px !important;
+}
+
+/* Améliorer l'apparence des options dans le dropdown */
+.ant-select-dropdown .ant-select-item {
+  padding: 8px 12px;
+}
+
+.ant-select-dropdown .ant-select-item-option-content {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+} 

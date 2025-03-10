@@ -1,0 +1,175 @@
+.invoice-card {
+  height: 180px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.invoice-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.invoice-card-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px 20px;
+}
+
+/* Statut des factures */
+.status-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.status-draft {
+  background-color: #9ca3af;
+}
+
+.status-sent {
+  background-color: #3b82f6;
+}
+
+.status-paid {
+  background-color: #10b981;
+}
+
+.status-overdue {
+  background-color: #ef4444;
+}
+
+.payment-unpaid {
+  border-right: 4px solid #ef4444;
+}
+
+.payment-partially-paid {
+  border-right: 4px solid #f59e0b;
+}
+
+.payment-paid {
+  border-right: 4px solid #10b981;
+}
+
+/* Animation pour les cartes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.invoice-card-animate {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Style pour les statistiques */
+.stats-card {
+  transition: all 0.3s ease;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Style pour les filtres */
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  margin-right: 0.5rem;
+}
+
+.filter-badge button {
+  margin-left: 0.25rem;
+  color: #0369a1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.filter-badge button:hover {
+  opacity: 1;
+}
+
+/* Style pour les boutons de statut */
+.status-button {
+  cursor: pointer;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  transition: all 0.2s;
+}
+
+.status-button:hover {
+  transform: scale(1.05);
+}
+
+/* Style pour l'état vide */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.empty-state svg {
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  color: #111827;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+/* Badge pour les factures en retard */
+.overdue-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  z-index: 10;
+}
+
+/* Badge pour les factures payées */
+.paid-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #d1fae5;
+  color: #047857;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  z-index: 10;
+} 

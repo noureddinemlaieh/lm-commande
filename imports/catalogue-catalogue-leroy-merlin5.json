@@ -1,0 +1,38 @@
+{
+  "name": "CATALOGUE  LEROY MERLIN",
+  "description": "Catalogue 2025",
+  "categories": [
+    {
+      "name": "Carrelage",
+      "order": 0,
+      "services": [
+        {
+          "name": "Application d'une couche de vernis acrylique (béton ciré)",
+          "description": null,
+          "price": 12.86,
+          "quantity": 1,
+          "unit": null,
+          "order": 0,
+          "materials": [
+            {
+              "name": "Barre de seuil d'arrêt - à choisir (prix indicatif)",
+              "quantity": 1,
+              "price": 7.99,
+              "unit": "u",
+              "reference": "12349",
+              "toChoose": false
+            },
+            {
+              "name": "Bâche de protection plastifiée MULTIPLAST, L.10 x l.0.9 m",
+              "quantity": 1,
+              "price": 24,
+              "unit": "u",
+              "reference": "82505702",
+              "toChoose": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

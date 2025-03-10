@@ -1,0 +1,208 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables pour le thème clair */
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+}
+
+/* Variables pour le thème sombre */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+  }
+}
+
+/* Styles de base */
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Classes personnalisées */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+  
+  .container {
+    @apply max-w-7xl mx-auto px-4;
+  }
+}
+
+.custom-popconfirm {
+  max-width: 400px;
+  pointer-events: auto !important;
+}
+
+.ant-popover.custom-popconfirm {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 1500 !important;
+}
+
+.ant-popover.custom-popconfirm .ant-popover-inner-content {
+  max-width: 100%;
+}
+
+.ant-popover.custom-popconfirm .ant-popover-inner {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Assurer que le fond de la popconfirm est bien visible */
+.ant-popover.custom-popconfirm .ant-popover-content {
+  background: white;
+  border-radius: 8px;
+}
+
+/* Style pour le fond semi-transparent */
+.ant-popover.custom-popconfirm::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: -1;
+}
+
+.sidebar {
+  position: relative;
+  min-height: 100%;
+  background-color: #f5f5f5;
+  transition: width 0.3s ease;
+  width: 250px;
+  z-index: 50;
+}
+
+.sidebar.closed {
+  width: 50px;
+}
+
+.toggle-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #666;
+  z-index: 50;
+}
+
+.toggle-button:hover {
+  background-color: #f0f0f0;
+}
+
+.sidebar-content {
+  padding: 20px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.closed .sidebar-content {
+  opacity: 0;
+  overflow: hidden;
+}
+
+.footer {
+  width: 100%;
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+  z-index: 40;
+}
+
+/* Style pour aligner à droite les champs de quantité */
+.right-aligned-input .ant-input-number-input {
+  text-align: right !important;
+  padding-right: 30px !important;
+}
+
+/* Optionnel : pour améliorer l'apparence */
+.right-aligned-input {
+  /* width: 40% !important; */
+}
+
+/* Afficher les contrôles d'incrémentation/décrémentation */
+.right-aligned-input .ant-input-number-handler-wrap {
+  display: flex !important;
+  flex-direction: column;
+  opacity: 1;
+  border-left: 1px solid #d9d9d9;
+  width: 22px !important;
+  right: 0;
+  position: absolute;
+  height: 100%;
+  background-color: #f5f5f5;
+}
+
+/* Ajuster la position des boutons pour qu'ils ne masquent pas le texte */
+.ant-input-number-handler {
+  height: 50% !important;
+  line-height: 12px !important;
+}
+
+.ant-input-number-handler-up-inner, 
+.ant-input-number-handler-down-inner {
+  font-size: 10px !important;
+  right: 2px !important;
+}
+
+/* Améliorer l'apparence des boutons au survol */
+.ant-input-number-handler:hover {
+  background-color: #e6f7ff;
+}
+
+/* Styles pour les entêtes de champs */
+.flex-col.items-center > span.leading-none {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+/* Assurer que les champs sont bien alignés */
+.flex-col.items-center {
+  min-width: fit-content;
+}
+
+/* Style pour l'addon (unité) */
+.ant-input-number-group-addon {
+  padding: 0 8px;
+  background-color: #f5f5f5;
+  border-left: 1px solid #d9d9d9;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+/* Assurer que le texte reste visible même avec les boutons */
+.ant-input-number-input {
+  font-size: 0.875rem !important;
+}
+
+/* Alignement à droite pour les champs numériques */
+.ant-input-number-right .ant-input-number-input {
+  text-align: right !important;
+  padding-right: 25px !important;
+}
