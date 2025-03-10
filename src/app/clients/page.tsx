@@ -51,6 +51,7 @@ export default function ClientsPage() {
     } finally {
       setDeleteModal({ isOpen: false });
     }
+  };
 
   const columns = [
     {
