@@ -5,7 +5,7 @@ import { Table, Button as AntButton, Space, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import type { Client } from '@/types/Client';
-import { ConfirmationModal } from '../../components/ui/ConfirmationModal';
+import { ConfirmationModal } from '@/components/ui';
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);

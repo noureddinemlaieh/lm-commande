@@ -5,7 +5,7 @@ import { Table, Button as AntButton, Space, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import type { Prescriber } from '@/types/Prescriber';
-import { ConfirmationModal } from '../../components/ui/ConfirmationModal';
+import { ConfirmationModal } from '@/components/ui';
 
 export default function PrescribersPage() {
   const [prescribers, setPrescribers] = useState<Prescriber[]>([]);
