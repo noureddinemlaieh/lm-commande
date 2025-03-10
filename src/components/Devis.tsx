@@ -5,7 +5,7 @@ import { CatalogueItem, CatalogueService } from '../types/catalogue';
 import { getCatalogues } from '../services/catalogueService';
 import { message, App, Select, InputNumber } from 'antd';
 import { DEVIS_STATUS } from '@/constants/devisStatus';
-import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { ConfirmationModal } from './ui/ConfirmationModal';
 import { useRouter } from 'next/navigation';
 import type { SelectProps } from 'antd';
 

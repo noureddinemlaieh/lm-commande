@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, message } from 'antd';
+import { Table, Button as AntButton, Space, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import type { Client } from '@/types/Client';
-import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { ConfirmationModal } from '../../components/ui/ConfirmationModal';
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -51,7 +51,6 @@ export default function ClientsPage() {
     } finally {
       setDeleteModal({ isOpen: false });
     }
-  };
 
   const columns = [
     {
@@ -79,19 +78,19 @@ export default function ClientsPage() {
       key: 'actions',
       render: (_: any, record: Client) => (
         <Space>
-          <Button 
+          <AntButton 
             icon={<EditOutlined />}
             onClick={() => router.push(`/clients/${record.id}/edit`)}
           >
             Modifier
-          </Button>
-          <Button 
+          </AntButton>
+          <AntButton 
             danger 
             icon={<DeleteOutlined />}
             onClick={() => showDeleteConfirm(record.id, record.name)}
           >
             Supprimer
-          </Button>
+          </AntButton>
         </Space>
       ),
     },
@@ -101,13 +100,13 @@ export default function ClientsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Clients</h1>
-        <Button 
+        <AntButton 
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => router.push('/clients/new')}
         >
           Nouveau Client
-        </Button>
+        </AntButton>
       </div>
 
       <Table
