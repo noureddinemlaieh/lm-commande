@@ -1,6 +1,14 @@
-<Link href="/devis" className="text-sm font-medium transition-colors hover:text-primary">
-  Devis
-</Link>
-<Link href="/devis/new" className="text-sm font-medium transition-colors hover:text-primary">
-  Créer un devis
-</Link> 
+import { Link } from 'next/link'
+
+export default function Navbar() {
+  return (
+    <nav className="flex gap-4">
+      <Link href="/devis" className="text-sm font-medium transition-colors hover:text-primary">
+        Devis
+      </Link>
+      <Link href="/devis/new" className="text-sm font-medium transition-colors hover:text-primary">
+        Créer un devis
+      </Link>
+    </nav>
+  )
+} 

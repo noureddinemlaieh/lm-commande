@@ -26,7 +26,6 @@ interface ServiceFormProps {
   onCloseParentModal?: () => void;
   onUpdateProduct?: (product: Product) => Promise<Product>;
   initialValues?: Partial<ServiceFormValues>;
-  catalogId?: string;
 }
 
 const ServiceForm: React.FC<ServiceFormProps> = ({
@@ -36,8 +35,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   onDelete,
   onCloseParentModal,
   onUpdateProduct,
-  initialValues,
-  catalogId
+  initialValues
 }) => {
   const [form] = Form.useForm();
   const [selectedService, setSelectedService] = useState<Product | null>(null);
@@ -358,6 +356,16 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           
           // Ajouter le nouveau matériau à la liste des produits
           updateProductsList(newMaterial);
+          
+          // Émettre un événement personnalisé pour informer que le matériau a été créé
+          window.dispatchEvent(new CustomEvent('materialCreated', {
+            detail: {
+              material: {
+                ...newMaterial,
+                quantity: 1 // Ajouter une quantité par défaut
+              }
+            }
+          }));
           
           // Sélectionner automatiquement le nouveau matériau dans le champ de sélection
           const currentFieldIndex = form.getFieldValue('currentFieldIndex') || 0;

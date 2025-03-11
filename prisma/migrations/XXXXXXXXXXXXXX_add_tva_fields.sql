@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "Devis" ADD COLUMN "globalServiceTVA" DECIMAL(65,2) NOT NULL DEFAULT 20,
+                    ADD COLUMN "globalMaterialTVA" DECIMAL(65,2) NOT NULL DEFAULT 20;
+
+-- AlterTable
+ALTER TABLE "DevisService" ADD COLUMN "tva" DECIMAL(65,2) NOT NULL DEFAULT 20;
+
+-- AlterTable
+ALTER TABLE "DevisMaterial" ADD COLUMN "tva" DECIMAL(65,2) NOT NULL DEFAULT 20; 

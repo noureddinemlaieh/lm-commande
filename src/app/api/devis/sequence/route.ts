@@ -75,17 +75,11 @@ export async function GET() {
       // Continuer même si l'enregistrement dans l'historique échoue
     }
 
-    return NextResponse.json({ 
-      reference,
-      number: counter,
-      year: new Date().getFullYear()
-    });
+    return NextResponse.json({ reference });
   } catch (error) {
     console.error('Erreur lors de la génération du numéro de devis:', error);
     return NextResponse.json({ 
-      reference: `ERROR-${Date.now()}`,
-      number: 0,
-      year: new Date().getFullYear()
+      reference: `ERROR-${Date.now()}`
     });
   }
 } 

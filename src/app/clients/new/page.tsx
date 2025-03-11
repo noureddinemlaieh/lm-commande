@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, message, Select, _Spin } from 'antd';
+import { Form, Input, Button, Card, message, Select, Spin } from 'antd';
 import { useRouter } from 'next/navigation';
 import type { Prescriber } from '@/types/Prescriber';
 

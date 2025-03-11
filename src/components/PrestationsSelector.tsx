@@ -16,7 +16,7 @@ interface Material {
 }
 
 // Interface pour les prestations
-interface Prestation {
+export interface Prestation {
   id: string;
   name: string;
   description?: string;

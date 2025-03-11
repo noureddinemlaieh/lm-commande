@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Table, Button as AntButton, Space, message } from 'antd';
+import { Table, Button, Space, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import type { Prescriber } from '@/types/Prescriber';
-import { ConfirmationModal } from '@/components/ui';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
 export default function PrescribersPage() {
   const [prescribers, setPrescribers] = useState<Prescriber[]>([]);
@@ -84,19 +84,19 @@ export default function PrescribersPage() {
       key: 'actions',
       render: (_: any, record: Prescriber) => (
         <Space>
-          <AntButton 
+          <Button 
             icon={<EditOutlined />}
             onClick={() => router.push(`/prescribers/${record.id}/edit`)}
           >
             Modifier
-          </AntButton>
-          <AntButton 
+          </Button>
+          <Button 
             danger 
             icon={<DeleteOutlined />}
             onClick={() => showDeleteConfirm(record.id, record.nom)}
           >
             Supprimer
-          </AntButton>
+          </Button>
         </Space>
       ),
     },
@@ -106,13 +106,13 @@ export default function PrescribersPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Prescripteurs</h1>
-        <AntButton 
+        <Button 
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => router.push('/prescribers/new')}
         >
           Nouveau Prescripteur
-        </AntButton>
+        </Button>
       </div>
 
       <Table

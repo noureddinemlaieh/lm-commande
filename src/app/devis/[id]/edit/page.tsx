@@ -24,6 +24,7 @@ import PrestationsSelector from '@/components/PrestationsSelector';
 import { PROJECT_TYPES } from '@/constants/projectTypes';
 import ServiceCreator from '@/components/catalogs/ServiceCreator';
 import ServiceForm from '@/components/catalogs/ServiceForm';
+import type { Product } from '@/types/Product';
 
 interface Prestation {
   id: string;
@@ -81,7 +82,7 @@ interface Section {
   category: { name: string } | string;
 }
 
-interface Product {
+interface DevisProduct {
   id: string;
   name: string;
   sellingPrice: number;
@@ -227,6 +228,15 @@ interface Service {
   }>;
 }
 
+interface DevisProduct {
+  id: string;
+  name: string;
+  sellingPrice: number;
+  unit: string;
+  category: string;
+  reference?: string;
+}
+
 export default function EditDevisPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [loadingState, setLoadingState] = useState(false);
@@ -322,7 +332,9 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
   const [isCatalogSelectorVisible, setIsCatalogSelectorVisible] = useState(false);
   const [selectedCategoryForService, setSelectedCategoryForService] = useState<string | null>(null);
   const [catalogCategories, setCatalogCategories] = useState<{id: string, name: string}[]>([]);
-  const [isLoadingSearch, setIsLoadingSearch] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showProductSelector, setShowProductSelector] = useState(false);
+  const [currentSectionAndPrestationId, setCurrentSectionAndPrestationId] = useState<{ sectionId: string, prestationId: string } | null>(null);
 
   const defaultValues = {
     prescripteur: devisNumber?.reference || '',
@@ -480,10 +492,6 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
     console.log('handleCatalogChange appelé avec catalogId:', catalogId);
     setSelectedCatalogId(catalogId);
     
-    // Charger les catégories du catalogue
-    // Ne pas appeler loadCatalogCategories ici pour éviter la boucle infinie
-    // Les catégories seront chargées automatiquement par l'effet qui surveille selectedCatalogId
-    
     try {
       // Indiquer que le chargement est en cours
       setIsLoadingCatalog(true);
@@ -549,27 +557,53 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
   };
 
   const handleSearch = async (value: string) => {
-    // Éviter les mises à jour d'état inutiles si la valeur n'a pas changé
-    if (value === searchValue) return;
-    
     setSearchValue(value);
     
-    // Ne pas déclencher de chargement pour les recherches locales
-    // Le filtrage local est géré par le composant Select lui-même
-    if (value.length < 3) return;
-    
-    setIsLoadingSearch(true);
-    
-    try {
-      // Si la valeur est vide ou trop courte, ne pas faire de recherche côté serveur
-      if (!selectedCatalogId || value.length < 3) {
-        return;
-      }
+    // Si la valeur est vide, afficher toutes les prestations du catalogue sélectionné
+    if (!selectedCatalogId) {
+      setPrestations([]);
+      return;
+    }
 
-      // Pour les recherches plus longues, on peut éventuellement faire une recherche côté serveur
-      // Mais pour l'instant, on utilise juste le filtrage local
-    } finally {
-      setIsLoadingSearch(false);
+    // Si la recherche est vide, montrer toutes les prestations
+    if (value.length === 0) {
+      setPrestations(catalogServices.map(service => ({
+        id: service.id,
+        nom: service.name,
+        reference: `${service.categoryName} - ${service.name}`,
+        prix: service.price || 0
+      })));
+      return;
+    }
+
+    // Sinon, filtrer les prestations selon la recherche
+    const filteredServices = catalogServices.filter(service =>
+      service.name.toLowerCase().includes(value.toLowerCase()) ||
+      (service.description?.toLowerCase() || '').includes(value.toLowerCase())
+    );
+
+    setPrestations(filteredServices.map(service => ({
+      id: service.id,
+      nom: service.name,
+      reference: `${service.categoryName} - ${service.name}`,
+      prix: service.price || 0
+    })));
+    
+    // Si aucun résultat n'est trouvé, afficher un message suggérant de créer une nouvelle prestation
+    if (filteredServices.length === 0 && value.length > 0) {
+      message.info(
+        <div>
+          Aucune prestation trouvée pour "{value}". 
+          <Button 
+            type="link" 
+            onClick={() => openCatalogSelector()}
+            style={{ padding: 0, height: 'auto' }}
+          >
+            Créer une nouvelle prestation ?
+          </Button>
+        </div>, 
+        5
+      );
     }
   };
 
@@ -597,37 +631,32 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
   };
 
   // Modifier la fonction handleAddPrestation
-  const handleAddPrestation = (sectionId: string, prestationId: string) => {
+  const handleAddPrestation = (sectionId: string, prestationId: string, selectedProduct: Product) => {
     const service = catalogServices.find(s => s.id === prestationId);
     if (!service) return;
 
     setSections(sections.map(section => {
       if (section.id === sectionId) {
-        const newPrestation = {
-          id: Math.random().toString(36).substr(2, 9),
-          name: service.name,
-          quantity: 1,
-          unit: 'm²',
-          unitPrice: service.price,
-          tva: globalServiceTVA, // Utiliser la TVA globale des services
-          amount: service.price,
-          description: service.description,
-          materials: service.materials.map(m => ({
-            id: Math.random().toString(36).substr(2, 9),
-            name: m.name,
-            quantity: m.quantity,
-            price: m.price,
-            unit: m.unit || 'unité',
-            reference: m.reference || '',
-            tva: globalMaterialTVA,
-            billable: false // Par défaut, le matériau n'est PAS facturable
-          })),
-          category: service.categoryName || 'SERVICE'
-        };
-
         return {
           ...section,
-          prestations: [...section.prestations, newPrestation]
+          prestations: section.prestations.map(prestation => {
+            if (prestation.id === prestationId) {
+              return {
+                ...prestation,
+                materials: [...prestation.materials, {
+                  id: selectedProduct.id,
+                  name: selectedProduct.name,
+                  quantity: 1,
+                  price: selectedProduct.sellingPrice,
+                  unit: selectedProduct.unit || '',
+                  reference: selectedProduct.reference || '',
+                  tva: globalMaterialTVA,
+                  billable: true
+                }]
+              };
+            }
+            return prestation;
+          })
         };
       }
       return section;
@@ -1636,7 +1665,7 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                       ...material,
                       name: selectedProduct.name,
                       price: selectedProduct.sellingPrice,
-                      unit: selectedProduct.unit,
+                      unit: selectedProduct.unit || '',  // Assure que unit est toujours une string
                       reference: selectedProduct.reference || '',
                       tva: material.tva
                     };
@@ -2141,6 +2170,25 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
     setSelectedCategoryForService(categoryId);
     setIsCatalogSelectorVisible(false);
     setIsServiceCreatorVisible(true);
+  };
+
+  // Fonction pour ouvrir le sélecteur de produit
+  const openProductSelector = (sectionId: string, prestationId: string) => {
+    setCurrentSectionAndPrestationId({ sectionId, prestationId });
+    setShowProductSelector(true);
+  };
+
+  // Fonction pour gérer la sélection d'un produit
+  const handleProductSelection = (product: Product) => {
+    if (currentSectionAndPrestationId) {
+      handleAddPrestation(
+        currentSectionAndPrestationId.sectionId,
+        currentSectionAndPrestationId.prestationId,
+        product
+      );
+    }
+    setShowProductSelector(false);
+    setCurrentSectionAndPrestationId(null);
   };
 
   if (loading || catalogsLoading) {
@@ -2649,7 +2697,7 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                                                       }
                                                       options={availableMaterials.map(m => ({
                                                         value: m.id,
-                                                        label: `${m.name} ${m.reference ? `(${m.reference})` : ''} - ${m.sellingPrice}€`
+                                                        label: `${m.name} (${m.reference || 'Sans réf.'}) - ${m.sellingPrice}€`
                                                       }))}
                                                     />
                                                   </td>
@@ -2780,26 +2828,11 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                                   suffixIcon={<span className="text-gray-400">▼</span>}
                                   variant="borderless"
                                   options={prestationOptions}
-                                  onChange={(value) => handleAddPrestation(section.id, value)}
-                                  onSearch={handleSearch}
+                                  onChange={(value) => openProductSelector(section.id, value)}
                                   filterOption={(input, option) =>
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                   }
-                                  notFoundContent={
-                                    isLoadingSearch ? <Spin size="small" /> : (
-                                      <div className="py-1">
-                                        <Button 
-                                          type="link" 
-                                          onClick={() => openCatalogSelector()}
-                                          style={{ padding: '4px 0' }}
-                                        >
-                                          {searchValue && searchValue.length > 0
-                                            ? `Créer "${searchValue}"`
-                                            : "Créer une nouvelle prestation"}
-                                        </Button>
-                                      </div>
-                                    )
-                                  }
+                                  notFoundContent={isLoading ? <Spin size="small" /> : "Aucune prestation trouvée"}
                                 />
                                 <Button 
                                   type="primary"
@@ -3020,7 +3053,7 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
               <div style={{ position: 'relative', minHeight: '300px' }}>
                 <ServiceForm
                   categoryId={selectedCategoryForService ? selectedCategoryForService : ''}
-                  products={products as any}
+                  products={products}
                   onSubmit={(values) => {
                     console.log('Nouvelle prestation créée:', values);
                     
@@ -3052,9 +3085,9 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                   onUpdateProduct={async (product) => {
                     // Mettre à jour le produit dans la liste des produits
                     const updatedProducts = products.map(p => 
-                      p.id === product.id ? {...product, unit: product.unit || ''} : p
+                      p.id === product.id ? product : p
                     );
-                    setProducts(updatedProducts as any);
+                    setProducts(updatedProducts);
                     return product;
                   }}
                   initialValues={{ name: searchValue }} // Passer le texte recherché comme valeur initiale
@@ -3104,36 +3137,6 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                     />
                   )}
-                  
-                  {selectedCatalogId && (
-                    <div className="mt-4">
-                      {isLoadingCatalog ? (
-                        <div className="flex justify-center">
-                          <Spin />
-                          <span className="ml-2">Chargement des catégories...</span>
-                        </div>
-                      ) : (
-                        <>
-                          {catalogCategories && catalogCategories.length > 0 ? (
-                            <div className="text-sm text-gray-500">
-                              {catalogCategories.length} catégorie(s) disponible(s)
-                            </div>
-                          ) : (
-                            <div className="text-sm text-red-500">
-                              Aucune catégorie trouvée. Veuillez réessayer ou sélectionner un autre catalogue.
-                              <Button 
-                                type="link" 
-                                onClick={() => handleCatalogChange(selectedCatalogId)}
-                                className="p-0 ml-2"
-                              >
-                                Réessayer
-                              </Button>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )}
                 </div>
                 
                 <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
@@ -3155,6 +3158,36 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                   </Button>
                 </div>
               </div>
+            </Modal>
+
+            {/* Ajouter la modale de sélection de produit */}
+            <Modal
+              title="Sélectionner un produit"
+              open={showProductSelector}
+              onCancel={() => {
+                setShowProductSelector(false);
+                setCurrentSectionAndPrestationId(null);
+              }}
+              footer={null}
+            >
+              <Select
+                showSearch
+                style={{ width: '100%' }}
+                placeholder="Rechercher un produit..."
+                options={products.map(product => ({
+                  value: product.id,
+                  label: `${product.name} (${product.reference || 'Sans réf.'}) - ${product.sellingPrice}€`
+                }))}
+                onChange={(value) => {
+                  const product = products.find(p => p.id === value);
+                  if (product) {
+                    handleProductSelection(product);
+                  }
+                }}
+                filterOption={(input, option) =>
+                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+              />
             </Modal>
           </Form>
         </Card>

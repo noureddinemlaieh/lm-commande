@@ -2,9 +2,6 @@
 const nextConfig = {
   transpilePackages: ['antd', '@ant-design/icons'],
   
-  // Configuration pour l'export standalone
-  output: 'standalone',
-  
   // Ajouter la configuration webpack pour résoudre les problèmes de modules
   webpack: (config, { isServer }) => {
     // Résoudre le problème de next-flight-client-entry-loader
@@ -65,7 +62,6 @@ const nextConfig = {
   images: {
     domains: [],
     formats: ['image/avif', 'image/webp'],
-    unoptimized: process.env.NODE_ENV === 'development',
   },
   
   // Optimisation du chargement des modules
@@ -77,45 +73,7 @@ const nextConfig = {
   
   // Optimisation de la compilation
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
-  },
-  
-  // Configuration pour la compression
-  compress: true,
-  
-  // Configuration pour les en-têtes HTTP
-  headers: async () => {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-        ],
-      },
-    ];
-  },
-  
-  // Configuration pour les redirections
-  redirects: async () => {
-    return [];
-  },
-  
-  // Configuration pour les rewrites
-  rewrites: async () => {
-    return [];
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from 'antd';
+import { Button } from '@/components/ui/button';
 import { ReactNode } from 'react';
 
 export interface ConfirmationModalProps {
@@ -30,10 +30,10 @@ export function ConfirmationModal({
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         <div className="mb-6">{message}</div>
         <div className="flex justify-end gap-3">
-          <Button onClick={onCancel}>
+          <Button variant="secondary" onClick={onCancel}>
             {cancelText}
           </Button>
-          <Button type="primary" onClick={onConfirm}>
+          <Button variant="primary" onClick={onConfirm}>
             {confirmText}
           </Button>
         </div>

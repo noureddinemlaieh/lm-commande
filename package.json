@@ -4,17 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "postinstall": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate deploy",
-    "db:seed": "prisma db seed",
-    "analyze": "ANALYZE=true next build",
-    "production:build": "NODE_ENV=production next build",
-    "production:start": "NODE_ENV=production next start"
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
@@ -60,12 +53,5 @@
     "prisma": "^6.4.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
-  },
-  "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
-  },
-  "engines": {
-    "node": ">=18.17.0",
-    "npm": ">=9.6.7"
   }
 }

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Service" ADD COLUMN     "order" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "quantity" INTEGER NOT NULL DEFAULT 1;

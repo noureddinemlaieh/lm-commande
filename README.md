@@ -1,141 +1,36 @@
-# LM Commande
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Application de gestion de devis et commandes pour LM Commande.
+## Getting Started
 
-## Fonctionnalités
-
-- Gestion des devis
-- Gestion des clients
-- Gestion des catalogues et produits
-- Génération de PDF
-- Interface utilisateur moderne avec Ant Design
-
-## Technologies utilisées
-
-- Next.js 14
-- React
-- TypeScript
-- Prisma ORM
-- PostgreSQL
-- Ant Design
-- Docker
-
-## Installation
-
-### Prérequis
-
-- Node.js 18 ou supérieur
-- npm 9 ou supérieur
-- PostgreSQL (ou Docker pour l'environnement de développement)
-
-### Installation des dépendances
-
-```bash
-npm install
-```
-
-### Configuration de l'environnement
-
-Créez un fichier `.env` à la racine du projet avec les variables suivantes :
-
-```
-DATABASE_URL="postgresql://user:password@localhost:5432/lm_commande_db?schema=public"
-```
-
-Remplacez `user`, `password` et les autres paramètres selon votre configuration.
-
-### Initialisation de la base de données
-
-```bash
-npx prisma migrate dev
-```
-
-### Démarrage en mode développement
+First, run the development server:
 
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-L'application sera accessible à l'adresse [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Scripts disponibles
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-- `npm run dev` : Démarre l'application en mode développement
-- `npm run build` : Construit l'application pour la production
-- `npm run start` : Démarre l'application en mode production
-- `npm run lint` : Vérifie le code avec ESLint
-- `npm run db:migrate` : Exécute les migrations de base de données
-- `npm run db:seed` : Initialise la base de données avec des données de test
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Déploiement
+## Learn More
 
-### Déploiement sur Vercel (Recommandé)
+To learn more about Next.js, take a look at the following resources:
 
-1. Créez un compte sur [Vercel](https://vercel.com) si vous n'en avez pas déjà un.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-2. Installez l'interface de ligne de commande Vercel :
-   ```bash
-   npm install -g vercel
-   ```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-3. Connectez-vous à votre compte Vercel :
-   ```bash
-   vercel login
-   ```
+## Deploy on Vercel
 
-4. Déployez l'application :
-   ```bash
-   vercel
-   ```
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-5. Pour les déploiements de production :
-   ```bash
-   vercel --prod
-   ```
-
-### Déploiement avec Docker
-
-1. Construire l'image Docker
-   ```bash
-   docker build -t lm-commande .
-   ```
-
-2. Exécuter le conteneur
-   ```bash
-   docker-compose up -d
-   ```
-
-## Structure du projet
-
-```
-lm_commande/
-├── prisma/              # Schéma et migrations Prisma
-├── public/              # Fichiers statiques
-├── src/
-│   ├── app/             # Routes et pages Next.js
-│   ├── components/      # Composants React réutilisables
-│   ├── lib/             # Bibliothèques et utilitaires
-│   ├── services/        # Services pour les API et la logique métier
-│   └── types/           # Définitions de types TypeScript
-├── .env                 # Variables d'environnement
-├── .env.production      # Variables d'environnement pour la production
-├── docker-compose.yml   # Configuration Docker Compose
-├── Dockerfile           # Configuration Docker
-└── next.config.js       # Configuration Next.js
-```
-
-## Contribution
-
-1. Clonez le dépôt
-2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/amazing-feature`)
-3. Committez vos changements (`git commit -m 'Add some amazing feature'`)
-4. Poussez vers la branche (`git push origin feature/amazing-feature`)
-5. Ouvrez une Pull Request
-
-## Licence
-
-Propriétaire - Tous droits réservés
-
-## Contact
-
-LM Commande - [contact@lmcommande.fr](mailto:contact@lmcommande.fr)
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

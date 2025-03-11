@@ -1,10 +1,11 @@
+import React from 'react';
 import dynamic from 'next/dynamic';
 
 // Fonction pour charger dynamiquement les composants avec options
 export const dynamicComponent = (importFunc: () => Promise<any>, options = {}) => {
   return dynamic(importFunc, {
     ssr: false, // Désactiver le rendu côté serveur pour les composants lourds
-    loading: () => <div className="loading-component">Chargement...</div>,
+    loading: () => React.createElement('div', { className: 'loading-component' }, 'Chargement...'),
     ...options,
   });
 };

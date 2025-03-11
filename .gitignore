@@ -1,10 +1,3 @@
-# PlanetHoster deployment files
-/@deploy/
-/DEPL/
-*.zip
-deploy-planethoster.ps1
-check-deploy-planethoster.ps1
-PLANETHOSTER.md
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies

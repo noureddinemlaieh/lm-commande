@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Select, Spin, Form, Card, Button, Modal, Input, Checkbox, App, Tooltip, InputNumber, Dropdown } from 'antd';
@@ -7,20 +7,19 @@ import { getNextDevisNumber } from '@/utils/devisSequence';
 import { Catalog, Service } from '@/types/Catalog';
 import type { Client } from '@/types/Client';
 import React from 'react';
-import { DownOutlined, RightOutlined, PrinterOutlined, EyeOutlined, FileTextOutlined, DollarOutlined, PlusOutlined, DeleteOutlined, SaveOutlined, WarningOutlined, ArrowUpOutlined, ArrowDownOutlined, MoreOutlined, ReloadOutlined } from '@ant-design/icons';
+import { DownOutlined, RightOutlined, PrinterOutlined, EyeOutlined, FileTextOutlined, DollarOutlined, PlusOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined, MoreOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import { useReactToPrint } from 'react-to-print';
-import { DevisPrint } from '@/components/DevisPrint';
-import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import { DevisPDF } from '@/components/DevisPDF';
 import { getProducts } from '@/lib/products';
-import type { Product } from "@prisma/client";
+import type { Product as PrismaProduct } from "@prisma/client";
 import { DevisWithMaterialsPDF } from '@/components/DevisWithMaterialsPDF';
 import { OrderFormPDF } from '@/components/OrderFormPDF';
 import { CreateInvoiceFromDevis } from '@/components/CreateInvoiceFromDevis';
 import { PAYMENT_METHODS } from '@/types/payment';
 import { useSearchParams } from 'next/navigation';
-import PrestationsSelector from '@/components/PrestationsSelector';
+import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
+import PrestationsSelector, { Prestation } from '@/components/PrestationsSelector';
 import { PROJECT_TYPES } from '@/constants/projectTypes';
 import ServiceCreator from '@/components/catalogs/ServiceCreator';
 import ServiceForm from '@/components/catalogs/ServiceForm';
@@ -37,7 +36,29 @@ interface DevisNumber {
 interface Section {
   id: string;
   name: string;
-  prestations: Prestation[];
+  prestations: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    tva: number;
+    amount: number;
+    description?: string;
+    notes?: string;
+    conditions?: string;
+    category: { name: string };
+    materials: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      price: number;
+      unit: string;
+      reference?: string;
+      tva: number;
+      billable: boolean;
+    }>;
+  }>;
   materialsTotal: number;
   subTotal: number;
   category: { name: string };
@@ -46,6 +67,7 @@ interface Section {
 interface ExtendedService extends Omit<Service, 'categoryId'> {
   categoryName?: string;
   categoryId: string;
+  category: ProductCategory;
 }
 
 // Modifier l'interface pour les prestations du catalogue
@@ -118,6 +140,18 @@ interface DevisData {
   catalogId: string;
   sections: DevisSection[];
   showDescriptions?: boolean;
+  client: Client;
+  prescriber?: Client;
+  projectType: string;
+  paymentMethod: string;
+  retentionGuarantee: boolean;
+  retentionRate: number;
+  retentionAmount: number;
+  retentionDueDate?: Date;
+  retentionReleaseDate?: Date;
+  notes?: string;
+  conditions?: string;
+  validityPeriod?: number;
 }
 
 // Mettre à jour l'interface des totaux
@@ -173,15 +207,9 @@ interface Material {
   quantity: number;
   price: number;
   unit: string;
-  reference?: string;
+  reference?: string; // Rendre reference optionnel
   tva: number;
-  billable: boolean;
-  description?: string | null;
-  cost?: number;
-  sellingPrice?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
-  category?: ProductCategory;
+  billable: boolean; // Ajouter une propriété 'billable'
 }
 
 interface Category {
@@ -254,30 +282,38 @@ const ReferenceInput = ({
   );
 };
 
-interface MaterialProduct extends Product {
+interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  sellingPrice: number;
+  unit: string;
+  reference?: string;
   tva: number;
   billable: boolean;
-  quantity: number;
-  price: number;
-  unit: string | null;
-  reference: string | null;
-  description: string | null;
 }
 
-interface Prestation {
+interface ConvertedProduct {
   id: string;
   name: string;
   quantity: number;
+  price: number;
   unit: string;
-  unitPrice: number;
+  reference?: string;
   tva: number;
-  amount: number;
-  description?: string;
-  notes?: string;
-  conditions?: string;
-  category: { name: string };
-  materials: Material[];
+  billable: boolean;
 }
+
+const convertProduct = (p: Product): ConvertedProduct => ({
+  id: p.id,
+  name: p.name,
+  quantity: 1,
+  price: p.sellingPrice,
+  unit: p.unit,
+  reference: p.reference,
+  tva: p.tva,
+  billable: p.billable ?? true
+});
 
 export default function NewDevisPage() {
   const router = useRouter();
@@ -285,13 +321,13 @@ export default function NewDevisPage() {
   const { message } = App.useApp();
   const [isLoading, setIsLoading] = useState(false);
   const [catalogs, setCatalogs] = useState<Catalog[]>([]);
-  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
+  const [selectedCatalogId, setSelectedCatalogId] = useState<string>('');
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<string>('');
   const [devisNumber, setDevisNumber] = useState<DevisNumber | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [prestations, setPrestations] = useState<CatalogPrestation[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [totals, setTotals] = useState<Totals>({
     totalHT: 0,
     totalTVA: 0,
@@ -329,7 +365,7 @@ export default function NewDevisPage() {
   const [expandedPrestations, setExpandedPrestations] = useState<string[]>([]);
   const [expandedMaterials, setExpandedMaterials] = useState<string[]>([]);
   const [expandedDescriptions, setExpandedDescriptions] = useState<string[]>([]);
-  const [availableMaterials, setAvailableMaterials] = useState<any[]>([]);
+  const [availableMaterials, setAvailableMaterials] = useState<Product[]>([]);
   const [materialSearchValue, setMaterialSearchValue] = useState<string>('');
   const [status, setStatus] = useState('DRAFT');
   const [globalServiceTVA, setGlobalServiceTVA] = useState(20);
@@ -383,6 +419,15 @@ export default function NewDevisPage() {
   
   // Ajouter une référence pour le debounce de la recherche
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [localRef, setLocalRef] = useState<HTMLDivElement | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      setLocalRef(ref.current);
+    }
+  }, [ref]);
 
   // Surveiller les changements dans catalogCategories
   useEffect(() => {
@@ -478,39 +523,20 @@ export default function NewDevisPage() {
 
   const fetchDevisNumber = useCallback(async () => {
     try {
-      // Ne pas générer un nouveau numéro si nous sommes en mode édition
-      if (isEditMode) {
-        return;
-      }
-      
-      // Vérifier si un numéro de devis est déjà stocké dans le localStorage
-      const storedDevisNumber = localStorage.getItem('currentDevisNumber');
-      if (storedDevisNumber) {
-        const parsedDevisNumber = JSON.parse(storedDevisNumber);
-        setDevisNumber(parsedDevisNumber);
-        return;
-      }
-      
-      // Si aucun numéro n'est stocké, en générer un nouveau
       setLoading(true); // Activer l'état de chargement
-      const { reference, number, year } = await getNextDevisNumber();
-      const newDevisNumber = {
-        number: number,
-        year: year,
+      const { reference } = await getNextDevisNumber();
+      setDevisNumber({
+        number: 0,
+        year: new Date().getFullYear(),
         reference: reference
-      };
-      
-      // Stocker le numéro dans le localStorage
-      localStorage.setItem('currentDevisNumber', JSON.stringify(newDevisNumber));
-      
-      setDevisNumber(newDevisNumber);
+      });
     } catch (error) {
       console.error('Erreur lors de la récupération du numéro de devis:', error);
       message.error('Impossible de générer le numéro de devis');
     } finally {
       setLoading(false); // Désactiver l'état de chargement, qu'il y ait une erreur ou non
     }
-  }, [setLoading, setDevisNumber, message, isEditMode]);
+  }, [setLoading, setDevisNumber, message]);
 
   const loadClients = useCallback(async () => {
     try {
@@ -598,17 +624,6 @@ export default function NewDevisPage() {
   useEffect(() => {
     loadPrescribers();
   }, [loadPrescribers]);
-
-  // Nettoyer le localStorage lorsque l'utilisateur quitte la page
-  useEffect(() => {
-    // Fonction de nettoyage qui sera appelée lorsque le composant est démonté
-    return () => {
-      // Ne pas supprimer le numéro si nous sommes en mode édition
-      if (!isEditMode) {
-        localStorage.removeItem('currentDevisNumber');
-      }
-    };
-  }, [isEditMode]);
 
   useEffect(() => {
     const loadDevisData = async () => {
@@ -870,20 +885,19 @@ export default function NewDevisPage() {
           fullMaterial: fullMaterial
         });
 
-        // Créer un matériau avec les propriétés de base
-        const baseMaterial = {
+        // Utiliser la référence du matériau complet ou générer une référence aléatoire
+        const reference = fullMaterial?.reference || `REF-${Math.floor(Math.random() * 10000)}`;
+        
+        return {
           id: Math.random().toString(36).substr(2, 9),
           name: material.name,
           quantity: material.quantity || 1,
           price: material.price || 0,
           unit: material.unit || 'unité',
-          reference: fullMaterial?.reference || '',
+          reference: reference, // Utiliser la référence trouvée ou générée
           tva: globalMaterialTVA,
-          billable: false
+          billable: false // Ajouter cette propriété
         };
-
-        // Valider le matériau
-        return validateMaterial(baseMaterial);
       }));
 
       // Log pour vérifier les matériaux avec références
@@ -893,13 +907,13 @@ export default function NewDevisPage() {
       const newPrestation = {
         id: newPrestationId,
         name: prestation.name,
-        description: prestation.description || '',
-        quantity: 1,
+        quantity: prestation.quantity || 1,
         unit: prestation.unit || 'm²',
-        unitPrice: prestation.price,
+        unitPrice: prestation.price || 0,
         tva: globalServiceTVA,
-        amount: prestation.price,
-        category: { name: prestation.categoryName || '' },
+        amount: (prestation.price || 0) * (prestation.quantity || 1),
+        description: prestation.description || '',
+        category: { name: prestation.categoryName || 'Général' },
         materials: materialsWithReferences
       };
 
@@ -1214,20 +1228,12 @@ export default function NewDevisPage() {
         if (!materialsByTVA[tauxTVA]) {
           materialsByTVA[tauxTVA] = { ht: 0, tva: 0 };
         }
-        if (Array.isArray(prestation.materials)) {
-          prestation.materials.forEach(material => {
-            if (material && typeof material.quantity === 'number' && typeof material.price === 'number') {
-              const materialHT = material.quantity * material.price;
-              sectionMaterialsTotal += materialHT;
-              materialsByTVA[tauxTVA].ht += materialHT;
-              materialsByTVA[tauxTVA].tva += materialHT * (tauxTVA / 100);
-            } else {
-              console.warn('Material invalide trouvé:', material);
-            }
-          });
-        } else {
-          console.warn('prestation.materials n\'est pas un tableau:', prestation.materials);
-        }
+        prestation.materials.forEach(material => {
+          const materialHT = material.quantity * material.price;
+          sectionMaterialsTotal += materialHT;
+          materialsByTVA[tauxTVA].ht += materialHT;
+          materialsByTVA[tauxTVA].tva += materialHT * (tauxTVA / 100);
+        });
       });
 
       return {
@@ -1276,11 +1282,26 @@ export default function NewDevisPage() {
   };
 
   useEffect(() => {
-    if (sections.length > 0) {
-      const newTotals = calculateTotals([...sections]); // Passer une copie des sections
-      setTotals(newTotals); // Mettre à jour l'état avec les nouveaux totaux
+    if (sections) {
+      const totals = calculateTotals(sections);
+      setTotals(totals);
     }
-  }, [JSON.stringify(sections)]); // Dépendre d'une version stringifiée des sections
+  }, [sections, calculateTotals]);
+
+  useEffect(() => {
+    if (localRef) {
+      setLocalRef(localRef);
+    }
+  }, [localRef]);
+
+  useEffect(() => {
+    const handleMessage = () => {
+      message.success('Devis enregistré avec succès');
+    };
+    return () => {
+      message.destroy();
+    };
+  }, [message]);
 
   const handleSaveDevis = async (status = 'DRAFT') => {
     try {
@@ -1300,10 +1321,6 @@ export default function NewDevisPage() {
 
       // Préparer les données du devis
       const devisData = {
-        // Ajouter les informations du numéro de devis
-        number: devisNumber.number,
-        year: devisNumber.year,
-        reference: devisNumber.reference,
         status: status,
         clientId: selectedClient,
         catalogId: selectedCatalogId,
@@ -1376,9 +1393,6 @@ export default function NewDevisPage() {
 
       const result = await response.json();
       message.success('Devis enregistré avec succès');
-      
-      // Supprimer le numéro de devis du localStorage après l'enregistrement réussi
-      localStorage.removeItem('currentDevisNumber');
       
       // Ajouter un petit délai avant la redirection pour s'assurer que les données sont enregistrées
       setTimeout(() => {
@@ -1690,7 +1704,7 @@ export default function NewDevisPage() {
     sectionId: string,
     prestationId: string,
     materialId: string,
-    selectedProduct: any
+    selectedProduct: Product
   ) => {
     setSections(sections.map(section => {
       if (section.id === sectionId) {
@@ -1702,17 +1716,14 @@ export default function NewDevisPage() {
                 ...prestation,
                 materials: prestation.materials.map(material => {
                   if (material.id === materialId) {
-                    // Créer un nouveau matériau avec les propriétés mises à jour
-                    const updatedMaterial = {
+                    return {
                       ...material,
                       name: selectedProduct.name,
-                      price: selectedProduct.sellingPrice || selectedProduct.price,
+                      price: selectedProduct.sellingPrice,
                       unit: selectedProduct.unit || material.unit,
                       reference: selectedProduct.reference || '',
-                      tva: selectedProduct.tva || material.tva
+                      tva: material.tva
                     };
-                    // Valider le matériau avant de le retourner
-                    return validateMaterial(updatedMaterial);
                   }
                   return material;
                 })
@@ -1832,9 +1843,9 @@ export default function NewDevisPage() {
   }, [prestations]);
 
   // Fonction pour gérer la création d'une nouvelle prestation
-  const handleServiceCreated = (newService: any) => {
+  const handleServiceCreated = (newService: ExtendedService) => {
     // Fermer la modale
-    // setIsServiceCreatorVisible(false); // Cette ligne est redondante car la modale est déjà fermée dans onSubmit
+    setIsServiceCreatorVisible(false);
     
     // Réinitialiser le champ de recherche
     setPrestationSearchValue('');
@@ -1890,50 +1901,36 @@ export default function NewDevisPage() {
       const newPrestation = {
         id: Math.random().toString(36).substr(2, 9),
         name: newService.name,
-        quantity: 1,
-        unit: newService.unit || 'm²', // Utiliser la valeur de newService.unit
+        quantity: newService.quantity || 1,
+        unit: newService.unit || 'm²',
         unitPrice: newService.price || 0,
         tva: globalServiceTVA,
-        amount: newService.price || 0,
+        amount: (newService.price || 0) * (newService.quantity || 1),
         description: newService.description || '',
-        notes: '',
-        conditions: '',
-        category: { name: newService.categoryName || '' },
-        materials: (newService.materials || []).map((material: any) => {
-          console.log('Matériau à ajouter à la prestation:', material);
-          
-          // Vérifier si le matériau a toutes les informations nécessaires
-          if (!material.name || material.name === 'Matériau') {
-            console.log('Matériau sans nom ou avec nom générique, recherche par ID:', material.id);
-            // Essayer de récupérer les informations du matériau à partir de l'ID
-            const product = availableMaterials.find(m => m.id === material.id);
-            if (product) {
-              console.log('Produit trouvé pour le matériau:', product);
-              return {
-                id: Math.random().toString(36).substr(2, 9),
-                name: product.name,
-                quantity: material.quantity || 1,
-                price: product.sellingPrice || 0,
-                unit: product.unit || 'u',
-                reference: product.reference || '',
-                tva: globalMaterialTVA,
-                billable: false
-              };
-            } else {
-              console.log('Aucun produit trouvé pour le matériau avec ID:', material.id);
-            }
+        category: { name: newService.categoryName || 'Général' },
+        materials: newService.materials.map(material => {
+          const product = products.find(p => p.id === material.id);
+          if (!product) {
+            return {
+              id: material.id,
+              name: material.name,
+              quantity: material.quantity || 1,
+              price: 0,
+              unit: material.unit || 'unité',
+              reference: '',
+              tva: globalMaterialTVA,
+              billable: false // Par défaut, le matériau n'est PAS facturable
+            };
           }
-          
-          // Utiliser les informations du matériau telles quelles
-          const result = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: material.name || 'Matériau',
+          return {
+            id: material.id,
+            name: product?.name || 'Matériau',
             quantity: material.quantity || 1,
-            price: material.price || 0,
-            unit: material.unit || 'u',
-            reference: material.reference || '',
+            price: product?.sellingPrice || 0,
+            unit: product?.unit || material.unit || 'unité',
+            reference: product?.reference || '',
             tva: globalMaterialTVA,
-            billable: false
+            billable: false // Par défaut, le matériau n'est PAS facturable
           };
         })
       };
@@ -1961,7 +1958,7 @@ export default function NewDevisPage() {
   };
 
   // Fonction pour gérer la création d'une catégorie
-  const handleCategoryCreated = (newCategory: any) => {
+  const handleCategoryCreated = (newCategory: ProductCategory) => {
     console.log('Nouvelle catégorie créée:', newCategory);
     
     // Fermer la modale de création de catégorie
@@ -1974,10 +1971,10 @@ export default function NewDevisPage() {
     if (selectedCatalogId) {
       loadCatalogCategories(selectedCatalogId).then(() => {
         // Présélectionner la nouvelle catégorie
-        setSelectedCategoryForService(newCategory.id);
+        setSelectedCategoryForService(newCategory);
         
         // Afficher un message de succès
-        message.success(`Catégorie "${newCategory.name}" créée avec succès`);
+        message.success(`Catégorie "${newCategory}" créée avec succès`);
       });
     }
   };
@@ -1991,13 +1988,12 @@ export default function NewDevisPage() {
   }, [selectedCatalogId, isCatalogSelectorVisible]);
 
   // Fonction pour continuer vers la création de prestation après sélection de catégorie
-  const continueToServiceCreation = (categoryId: string) => {
-    setSelectedCategoryForService(categoryId);
+  const continueToServiceCreation = (category: ProductCategory) => {
+    setSelectedCategoryForService(category);
     setIsCatalogSelectorVisible(false);
     
     // Récupérer le nom de la catégorie sélectionnée
-    const selectedCategory = catalogCategories.find(cat => cat.id === categoryId);
-    const categoryName = selectedCategory ? selectedCategory.name : '';
+    const categoryName = category;
     
     // Si un texte de recherche original existe, l'utiliser
     if (originalSearchText && originalSearchText.trim() !== '') {
@@ -2017,47 +2013,67 @@ export default function NewDevisPage() {
 
   // Ajouter un useEffect pour écouter l'événement materialCreated
   useEffect(() => {
-    const handleMaterialCreated = (event: any) => {
-      const { material, fromServiceForm } = event.detail;
-      console.log('Événement materialCreated reçu:', material, 'fromServiceForm:', fromServiceForm);
-      
-      // Fonction pour convertir les produits au format attendu
-      const convertMaterial = (p: any): Material => ({
-        id: p.id || Math.random().toString(36).substr(2, 9),
-        name: p.name || 'Sans nom',
-        quantity: typeof p.quantity === 'number' ? p.quantity : 1,
-        price: typeof p.price === 'number' ? p.price : 0,
-        unit: p.unit || 'unité',
-        reference: p.reference || undefined,
-        tva: typeof p.tva === 'number' ? p.tva : globalMaterialTVA,
-        billable: typeof p.billable === 'boolean' ? p.billable : false
-      });
+    const handleMaterialCreated = (event: { material: Material }) => {
+      const { material } = event;
+      console.log('Événement materialCreated reçu:', material);
       
       // Ajouter le matériau à la liste des produits
       setProducts(prevProducts => {
+        // Vérifier si le matériau existe déjà dans la liste
         if (prevProducts.some(p => p.id === material.id)) {
           return prevProducts;
         }
-        const newProduct = validateMaterial(material);
-        return [...prevProducts, newProduct];
+        
+        // Convertir le matériau au format Product
+        const convertedMaterial = {
+          id: material.id,
+          name: material.name,
+          description: '',
+          unit: material.unit || 'unité',
+          sellingPrice: material.price || 0,
+          reference: material.reference || undefined,
+          tva: globalMaterialTVA,
+          billable: true
+        };
+        
+        // Ajouter le matériau à la liste
+        return [...prevProducts, convertedMaterial];
       });
       
       // Ajouter le matériau à la liste des matériaux disponibles
       setAvailableMaterials(prevMaterials => {
+        // Vérifier si le matériau existe déjà dans la liste
         if (prevMaterials.some(m => m.id === material.id)) {
           return prevMaterials;
         }
-        const newMaterial = validateMaterial(material);
-        return [...prevMaterials, newMaterial];
+        
+        // Convertir le matériau au format Product
+        const convertedMaterial = {
+          id: material.id,
+          name: material.name,
+          description: '',
+          unit: material.unit || 'unité',
+          sellingPrice: material.price || 0,
+          reference: material.reference || undefined,
+          tva: globalMaterialTVA,
+          billable: true
+        };
+        
+        // Ajouter le matériau à la liste
+        return [...prevMaterials, convertedMaterial];
       });
     };
     
     // Ajouter l'écouteur d'événement
-    window.addEventListener('materialCreated', handleMaterialCreated);
-    
+    window.addEventListener('materialCreated', ((event: CustomEvent) => {
+      handleMaterialCreated(event.detail);
+    }) as EventListener);
+
     // Nettoyer l'écouteur d'événement
     return () => {
-      window.removeEventListener('materialCreated', handleMaterialCreated);
+      window.removeEventListener('materialCreated', ((event: CustomEvent) => {
+        handleMaterialCreated(event.detail);
+      }) as EventListener);
     };
   }, []);
 
@@ -2095,26 +2111,15 @@ export default function NewDevisPage() {
   };
 
   // Fonction utilitaire pour la recherche normalisée
-  const normalizedSearch = (input: string, option: any) => {
-    if (!input) return true;
-    
-    // Récupérer le label et normaliser (supprimer les accents, mettre en minuscule)
-    const label = (option?.label as string || '').toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
-    // Normaliser l'entrée de recherche
-    const searchInput = input.toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
-    // Diviser en mots-clés et filtrer les mots vides
-    const keywords = searchInput.split(/\s+/).filter(k => k.length > 0);
-    
-    // Vérifier si tous les mots-clés sont présents dans le label
-    return keywords.every(keyword => label.includes(keyword));
+  const normalizedSearch = (input: string, option: { value: string; label: string } | undefined): boolean => {
+    if (!option) return false;
+    const normalizedInput = input.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const normalizedLabel = option.label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return normalizedLabel.includes(normalizedInput);
   };
 
   // Fonction pour gérer l'ajout de plusieurs prestations à la fois
-  const handleAddMultiplePrestations = (selectedPrestations: any[]) => {
+  const handleAddMultiplePrestations = (selectedPrestations: Array<Prestation>) => {
     if (!currentSectionId) return;
     
     // Créer un tableau pour stocker les nouvelles prestations
@@ -2122,36 +2127,32 @@ export default function NewDevisPage() {
       // Créer un nouvel ID unique pour la prestation
       const newPrestationId = Math.random().toString(36).substr(2, 9);
       
-      // Vérifier si la prestation a des matériaux
-      const materials = prestation.materials && Array.isArray(prestation.materials) 
-        ? prestation.materials.map((material: any) => ({
-            id: Math.random().toString(36).substr(2, 9),
-            name: material.name,
-            quantity: material.quantity,
-            price: material.price,
-            unit: material.unit || 'u',
-            reference: material.reference || '',
-            tva: globalMaterialTVA,
-            billable: false // Par défaut, le matériau n'est PAS facturable
-          }))
-        : [];
-      
-      // Créer la nouvelle prestation
-      return {
+      // Créer la nouvelle prestation avec tous les champs requis
+      const newPrestation = {
         id: newPrestationId,
         name: prestation.name,
         quantity: prestation.quantity || 1,
         unit: prestation.unit || 'm²',
-        unitPrice: prestation.price,
+        unitPrice: prestation.price || 0,
         tva: globalServiceTVA,
         amount: (prestation.price || 0) * (prestation.quantity || 1),
         description: prestation.description || '',
-        category: { name: prestation.categoryName || 'Général' },
-        materials: materials
+        materials: prestation.materials?.map(material => ({
+          id: Math.random().toString(36).substr(2, 9),
+          name: material.name,
+          quantity: material.quantity,
+          price: material.price,
+          unit: material.unit || 'u',
+          reference: material.reference || '',
+          tva: globalMaterialTVA,
+          billable: false // Par défaut, le matériau n'est PAS facturable
+        })) || []
       };
+      
+      return newPrestation;
     });
     
-    // Mettre à jour les sections
+    // Mettre à jour les sections avec les nouvelles prestations
     setSections(prevSections => {
       return prevSections.map(section => {
         if (section.id === currentSectionId) {
@@ -2163,13 +2164,9 @@ export default function NewDevisPage() {
         return section;
       });
     });
-    
-    // Fermer la modale
+
+    // Fermer le sélecteur de prestations
     setShowPrestationsSelector(false);
-    setCurrentSectionId(null);
-    
-    // Réinitialiser le champ de recherche
-    setPrestationSearchValue('');
   };
 
   // Fonction pour ouvrir la modale de sélection de catalogue et catégorie
@@ -2182,31 +2179,17 @@ export default function NewDevisPage() {
     setIsCatalogSelectorVisible(true);
   };
 
-  const validateMaterial = (material: any): Material => {
-    return {
-      id: material.id || Math.random().toString(36).substr(2, 9),
-      name: material.name || 'Sans nom',
-      quantity: material.quantity || 1,
-      price: material.price || 0,
-      unit: material.unit || 'unité',
-      reference: material.reference || '',
-      tva: material.tva || 20,
-      billable: material.billable ?? false,
-      description: material.description || null,
-      cost: material.cost || 0,
-      sellingPrice: material.sellingPrice || 0,
-      createdAt: material.createdAt || new Date(),
-      updatedAt: material.updatedAt || new Date(),
-      category: material.category || 'MATERIAL'
-    };
-  };
-
-  const validateMaterials = (materials: any): Material[] => {
-    if (!Array.isArray(materials)) {
-      return [];
-    }
-    return materials.map(validateMaterial);
-  };
+  // Déplacer la fonction convertMaterial ici pour qu'elle ait accès à globalMaterialTVA
+  const convertMaterial = (material: Material): ConvertedProduct => ({
+    id: material.id,
+    name: material.name,
+    quantity: material.quantity || 1,
+    price: material.price || 0,
+    unit: material.unit || 'unité',
+    reference: material.reference || '',
+    tva: material.tva || globalMaterialTVA,
+    billable: material.billable !== false
+  });
 
   return (
     <>
@@ -2652,24 +2635,20 @@ export default function NewDevisPage() {
                                               </thead>
                                               <tbody>
                                                 {prestation.materials.map((material, materialIndex) => {
-                                                  if (!material) {
-                                                    console.warn(`Material at index ${materialIndex} is undefined`);
-                                                    return null;
-                                                  }
                                                   console.log(`Rendu du matériau ${materialIndex}:`, material);
                                                   return (
                                                     <tr key={material.id} className="border-t">
                                                       <td className="p-2">
                                                         <Select
                                                           showSearch
-                                                          value={material?.name || ''}
+                                                          value={material.name}
                                                           className="material-name"
                                                           placeholder="Rechercher un matériau..."
                                                           optionFilterProp="children"
-                                                          title={material?.name || ''} // Utiliser l'opérateur optionnel ici aussi
+                                                          title={material.name} // Ajouter cette ligne pour l'infobulle
                                                           onChange={(value) => {
                                                             const selectedProduct = availableMaterials.find(m => m.id === value);
-                                                            if (selectedProduct && material?.id) {
+                                                            if (selectedProduct) {
                                                               handleMaterialSelect(section.id, prestation.id, material.id, selectedProduct);
                                                             }
                                                           }}
@@ -2989,7 +2968,7 @@ export default function NewDevisPage() {
           visible={showPrestationsSelector}
           onCancel={() => setShowPrestationsSelector(false)}
           onAdd={handleAddMultiplePrestations}
-          catalogId={selectedCatalogId || undefined}
+          catalogId={selectedCatalogId}
           loading={isLoading}
         />
 
@@ -3336,8 +3315,7 @@ export default function NewDevisPage() {
           onCancel={() => setIsServiceCreatorVisible(false)}
           footer={null}
           width={800}
-          destroyOnClose={false}
-          maskClosable={false}
+          destroyOnClose={true}
         >
           <div style={{ position: 'relative', minHeight: '300px' }}>
             {products.length === 0 ? (
@@ -3351,8 +3329,7 @@ export default function NewDevisPage() {
             <ServiceForm
               categoryId={selectedCategoryForService || ''}
               products={products}
-              catalogId={selectedCatalogId || undefined}
-              onSubmit={async (values) => {
+                onSubmit={async (values) => {
                 console.log('Nouvelle prestation créée:', values);
                 console.log('Matériaux de la prestation:', values.materials);
                 
@@ -3526,29 +3503,28 @@ export default function NewDevisPage() {
                       unit: values.unit || 'm²', // Ajouter explicitement le champ unit
                       categoryName: catalogCategories.find(cat => cat.id === selectedCategoryForService)?.name || 'Nouvelle prestation',
                   materials: values.materials.map(material => {
-                    const product = products.find(p => p.id === material.productId);
+                    const product = products.find(p => p.id === material.id);
                     if (!product) {
-                      console.warn(`Produit non trouvé pour le matériau avec ID ${material.productId}`);
-                      // Rechercher dans les matériaux sauvegardés
-                      const savedMaterial = savedMaterials.find(m => m.id === material.productId);
-                      if (savedMaterial) {
-                        return {
-                          id: savedMaterial.id,
-                          name: savedMaterial.name,
-                          quantity: material.quantity || 1,
-                          price: savedMaterial.sellingPrice || 0,
-                          unit: savedMaterial.unit || 'u',
-                          reference: savedMaterial.reference || '',
-                        };
-                      }
+                      return {
+                        id: material.id,
+                        name: material.name,
+                        quantity: material.quantity || 1,
+                        price: 0,
+                        unit: material.unit || 'unité',
+                        reference: '',
+                        tva: globalMaterialTVA,
+                        billable: false // Par défaut, le matériau n'est PAS facturable
+                      };
                     }
                     return {
-                      id: material.productId,
+                      id: material.id,
                       name: product?.name || 'Matériau',
                       quantity: material.quantity || 1,
                       price: product?.sellingPrice || 0,
-                      unit: product?.unit || 'u',
+                      unit: product?.unit || material.unit || 'unité',
                       reference: product?.reference || '',
+                      tva: globalMaterialTVA,
+                      billable: false // Par défaut, le matériau n'est PAS facturable
                     };
                   })
                 };
@@ -3564,7 +3540,7 @@ export default function NewDevisPage() {
                       unit: values.unit || '',
                       cost: values.price * 0.7,
                       sellingPrice: values.price,
-                      category: 'SERVICE' as ProductCategory,
+                      category: 'SERVICE',
                       reference: `${catalogCategories.find(cat => cat.id === selectedCategoryForService)?.name || ''}-${values.name}`,
                       createdAt: new Date(),
                       updatedAt: new Date()
@@ -3573,9 +3549,6 @@ export default function NewDevisPage() {
                     
                     // 7. Afficher un message de succès
                     message.success('Prestation créée et ajoutée avec succès');
-                    
-                    // 8. Fermer la modale
-                    setIsServiceCreatorVisible(false);
                     
                   } catch (error) {
                     console.error('Erreur lors de la création de la prestation:', error);
@@ -3785,5 +3758,4 @@ export default function NewDevisPage() {
     </>
   );
 }
-
 
