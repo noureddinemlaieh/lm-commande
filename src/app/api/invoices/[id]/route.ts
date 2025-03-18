@@ -14,9 +14,13 @@ export async function GET(
         id: params.id,
       },
       include: {
-        client: {
+        devis: {
           include: {
-            prescriber: true, // Inclure le prescripteur associé au client
+            client: {
+              include: {
+                prescriber: true,
+              },
+            },
           },
         },
         sections: {
@@ -29,7 +33,6 @@ export async function GET(
           },
         },
         retentionGuarantee: true,
-        devis: true,
       },
     });
     
@@ -147,8 +150,15 @@ export async function PUT(
       where: { id: params.id },
       data: updateData,
       include: {
-        client: true,
-        devis: true,
+        devis: {
+          include: {
+            client: {
+              include: {
+                prescriber: true,
+              },
+            },
+          },
+        },
         sections: {
           include: {
             items: {
@@ -199,7 +209,15 @@ export async function PUT(
     const finalInvoice = await prisma.invoice.findUnique({
       where: { id: params.id },
       include: {
-        client: true,
+        devis: {
+          include: {
+            client: {
+              include: {
+                prescriber: true,
+              },
+            },
+          },
+        },
         retentionGuarantee: true,
         sections: {
           include: {
