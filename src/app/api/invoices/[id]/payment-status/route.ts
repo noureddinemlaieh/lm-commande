@@ -66,8 +66,7 @@ export async function PATCH(
         data: {
           invoiceId: params.id,
           paymentStatus: data.paymentStatus,
-          changedAt: new Date(),
-          changedBy: 'user' // Remplacer par l'ID de l'utilisateur connecté si disponible
+          updatedAt: new Date()
         }
       });
     } catch (error) {
