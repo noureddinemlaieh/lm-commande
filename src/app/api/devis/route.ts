@@ -100,6 +100,10 @@ const safeBoolean = (value: any, defaultValue: boolean = false): boolean => {
   return defaultValue;
 };
 
+const isValidDevisStatus = (status: any): status is DevisStatus => {
+  return Object.values(DEVIS_STATUS).includes(status);
+};
+
 // GET pour récupérer tous les devis avec pagination
 export async function GET(request: Request) {
   try {
@@ -448,11 +452,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         { status: 404 }
       );
     }
-    
+
+    if (body.status && !isValidDevisStatus(body.status)) {
+      return NextResponse.json(
+        { error: "Le statut fourni n'est pas valide" },
+        { status: 400 }
+      );
+    }
+
     const devis = await prisma.devis.update({
       where: { id: params.id },
       data: {
-        status: body.status as DevisStatus,
+        status: body.status || undefined,
         expirationDate: body.expirationDate ? new Date(body.expirationDate) : null,
         paymentMethod: body.paymentMethod ? safeString(body.paymentMethod) : null,
         projectType: body.projectType ? safeString(body.projectType) : undefined,
