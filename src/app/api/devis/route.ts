@@ -452,7 +452,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const devis = await prisma.devis.update({
       where: { id: params.id },
       data: {
-        status: body.status ? safeString(body.status) : undefined,
+        status: body.status as DevisStatus,
         expirationDate: body.expirationDate ? new Date(body.expirationDate) : null,
         paymentMethod: body.paymentMethod ? safeString(body.paymentMethod) : null,
         projectType: body.projectType ? safeString(body.projectType) : undefined,
