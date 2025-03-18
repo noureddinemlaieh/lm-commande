@@ -24,7 +24,6 @@ import PrestationsSelector from '@/components/PrestationsSelector';
 import { PROJECT_TYPES } from '@/constants/projectTypes';
 import ServiceCreator from '@/components/catalogs/ServiceCreator';
 import ServiceForm from '@/components/catalogs/ServiceForm';
-import type { Product } from '@/types/Product';
 
 interface Prestation {
   id: string;
@@ -82,7 +81,7 @@ interface Section {
   category: { name: string } | string;
 }
 
-interface DevisProduct {
+interface Product {
   id: string;
   name: string;
   sellingPrice: number;
@@ -228,15 +227,6 @@ interface Service {
   }>;
 }
 
-interface DevisProduct {
-  id: string;
-  name: string;
-  sellingPrice: number;
-  unit: string;
-  category: string;
-  reference?: string;
-}
-
 export default function EditDevisPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [loadingState, setLoadingState] = useState(false);
@@ -332,9 +322,6 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
   const [isCatalogSelectorVisible, setIsCatalogSelectorVisible] = useState(false);
   const [selectedCategoryForService, setSelectedCategoryForService] = useState<string | null>(null);
   const [catalogCategories, setCatalogCategories] = useState<{id: string, name: string}[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showProductSelector, setShowProductSelector] = useState(false);
-  const [currentSectionAndPrestationId, setCurrentSectionAndPrestationId] = useState<{ sectionId: string, prestationId: string } | null>(null);
 
   const defaultValues = {
     prescripteur: devisNumber?.reference || '',
@@ -631,32 +618,37 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
   };
 
   // Modifier la fonction handleAddPrestation
-  const handleAddPrestation = (sectionId: string, prestationId: string, selectedProduct: Product) => {
+  const handleAddPrestation = (sectionId: string, prestationId: string) => {
     const service = catalogServices.find(s => s.id === prestationId);
     if (!service) return;
 
     setSections(sections.map(section => {
       if (section.id === sectionId) {
+        const newPrestation = {
+          id: Math.random().toString(36).substr(2, 9),
+          name: service.name,
+          quantity: 1,
+          unit: 'm²',
+          unitPrice: service.price,
+          tva: globalServiceTVA, // Utiliser la TVA globale des services
+          amount: service.price,
+          description: service.description,
+          materials: service.materials.map(m => ({
+            id: Math.random().toString(36).substr(2, 9),
+            name: m.name,
+            quantity: m.quantity,
+            price: m.price,
+            unit: m.unit || 'unité',
+            reference: m.reference || '',
+            tva: globalMaterialTVA,
+            billable: false // Par défaut, le matériau n'est PAS facturable
+          })),
+          category: service.categoryName || 'SERVICE'
+        };
+
         return {
           ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                materials: [...prestation.materials, {
-                  id: selectedProduct.id,
-                  name: selectedProduct.name,
-                  quantity: 1,
-                  price: selectedProduct.sellingPrice,
-                  unit: selectedProduct.unit || '',
-                  reference: selectedProduct.reference || '',
-                  tva: globalMaterialTVA,
-                  billable: true
-                }]
-              };
-            }
-            return prestation;
-          })
+          prestations: [...section.prestations, newPrestation]
         };
       }
       return section;
@@ -1665,7 +1657,7 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                       ...material,
                       name: selectedProduct.name,
                       price: selectedProduct.sellingPrice,
-                      unit: selectedProduct.unit || '',  // Assure que unit est toujours une string
+                      unit: selectedProduct.unit,
                       reference: selectedProduct.reference || '',
                       tva: material.tva
                     };
@@ -2170,25 +2162,6 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
     setSelectedCategoryForService(categoryId);
     setIsCatalogSelectorVisible(false);
     setIsServiceCreatorVisible(true);
-  };
-
-  // Fonction pour ouvrir le sélecteur de produit
-  const openProductSelector = (sectionId: string, prestationId: string) => {
-    setCurrentSectionAndPrestationId({ sectionId, prestationId });
-    setShowProductSelector(true);
-  };
-
-  // Fonction pour gérer la sélection d'un produit
-  const handleProductSelection = (product: Product) => {
-    if (currentSectionAndPrestationId) {
-      handleAddPrestation(
-        currentSectionAndPrestationId.sectionId,
-        currentSectionAndPrestationId.prestationId,
-        product
-      );
-    }
-    setShowProductSelector(false);
-    setCurrentSectionAndPrestationId(null);
   };
 
   if (loading || catalogsLoading) {
@@ -2697,7 +2670,7 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                                                       }
                                                       options={availableMaterials.map(m => ({
                                                         value: m.id,
-                                                        label: `${m.name} (${m.reference || 'Sans réf.'}) - ${m.sellingPrice}€`
+                                                        label: `${m.name} ${m.reference ? `(${m.reference})` : ''} - ${m.sellingPrice}€`
                                                       }))}
                                                     />
                                                   </td>
@@ -2828,7 +2801,7 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                                   suffixIcon={<span className="text-gray-400">▼</span>}
                                   variant="borderless"
                                   options={prestationOptions}
-                                  onChange={(value) => openProductSelector(section.id, value)}
+                                  onChange={(value) => handleAddPrestation(section.id, value)}
                                   filterOption={(input, option) =>
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                   }
@@ -3158,36 +3131,6 @@ export default function EditDevisPage({ params }: { params: { id: string } }) {
                   </Button>
                 </div>
               </div>
-            </Modal>
-
-            {/* Ajouter la modale de sélection de produit */}
-            <Modal
-              title="Sélectionner un produit"
-              open={showProductSelector}
-              onCancel={() => {
-                setShowProductSelector(false);
-                setCurrentSectionAndPrestationId(null);
-              }}
-              footer={null}
-            >
-              <Select
-                showSearch
-                style={{ width: '100%' }}
-                placeholder="Rechercher un produit..."
-                options={products.map(product => ({
-                  value: product.id,
-                  label: `${product.name} (${product.reference || 'Sans réf.'}) - ${product.sellingPrice}€`
-                }))}
-                onChange={(value) => {
-                  const product = products.find(p => p.id === value);
-                  if (product) {
-                    handleProductSelection(product);
-                  }
-                }}
-                filterOption={(input, option) =>
-                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-              />
             </Modal>
           </Form>
         </Card>

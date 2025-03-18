@@ -36,7 +36,7 @@ export interface DevisSection {
 
 export interface Devis {
   id: string;
-  number: number;
+  number: string;
   year: number;
   reference: string;
   status: string;
@@ -66,6 +66,12 @@ export interface DevisUpdateInput {
   reference?: string;
   status?: string;
   clientId?: string;
+  catalogId?: string;
+  prescriberId?: string;
+  expirationDate?: Date | null;
+  paymentMethod?: string;
+  pilot?: string;
+  projectType?: string;
   devisComments?: string;
   showDevisComments?: boolean;
   orderFormComments?: string;
@@ -124,4 +130,126 @@ export interface Material {
   reference?: string;
   tva: number;
   billable?: boolean;
+}
+
+export interface DevisInput {
+  number: string;
+  year: number;
+  reference?: string;
+  status: string;
+  clientId?: string;
+  catalogId?: string;
+  prescriberId?: string;
+  expirationDate?: Date | null;
+  paymentMethod?: string;
+  pilot?: string;
+  projectType?: string;
+  devisComments?: string;
+  showDevisComments?: boolean;
+  orderFormComments?: string;
+  showOrderFormComments?: boolean;
+  showDescriptions?: boolean;
+  catalog?: {
+    connect: {
+      id: string;
+    };
+  };
+  sections?: {
+    deleteMany: Record<string, never>;
+    create: Array<{
+      name: string;
+      materialsTotal: number;
+      subTotal: number;
+      category: {
+        connect: {
+          id: string;
+        };
+      };
+      services: {
+        create: Array<{
+          name: string;
+          description?: string;
+          price: number;
+          quantity: number;
+          unit?: string;
+          order: number;
+          category: {
+            connect: {
+              id: string;
+            };
+          };
+          tva?: number;
+          materials: {
+            create: Array<{
+              name: string;
+              quantity: number;
+              price: number;
+              unit?: string;
+            }>;
+          };
+        }>;
+      };
+    }>;
+  };
+}
+
+export interface DevisCreateInput {
+  number: string;
+  year: number;
+  reference: string;
+  status: string;
+  clientId?: string;
+  catalogId?: string;
+  prescriberId?: string;
+  expirationDate?: Date | null;
+  paymentMethod?: string;
+  pilot?: string;
+  projectType?: string;
+  devisComments?: string;
+  showDevisComments?: boolean;
+  orderFormComments?: string;
+  showOrderFormComments?: boolean;
+  showDescriptions?: boolean;
+  catalog?: {
+    connect: {
+      id: string;
+    };
+  };
+  sections?: {
+    deleteMany: Record<string, never>;
+    create: Array<{
+      name: string;
+      materialsTotal: number;
+      subTotal: number;
+      category: {
+        connect: {
+          id: string;
+        };
+      };
+      services: {
+        create: Array<{
+          name: string;
+          description?: string;
+          price: number;
+          quantity: number;
+          unit?: string;
+          order: number;
+          category: {
+            connect: {
+              id: string;
+            };
+          };
+          tva?: number;
+          materials: {
+            create: Array<{
+              name: string;
+              quantity: number;
+              price: number;
+              unit?: string;
+            }>;
+          };
+        }>;
+      };
+    }>;
+  };
 } 

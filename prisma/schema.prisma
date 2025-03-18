@@ -24,9 +24,9 @@ model Product {
 model Catalog {
   id          String            @id @default(cuid())
   name        String
-  description String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+  description String?
   categories  CatalogCategory[]
   products    CatalogProduct[]
   devis       Devis[]
@@ -48,11 +48,11 @@ model CatalogService {
   id          String            @id @default(cuid())
   name        String
   description String?
-  categoryId  String
   price       Float
   quantity    Int               @default(1)
   unit        String?
   order       Int               @default(0)
+  categoryId  String
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   materials   CatalogMaterial[]
@@ -62,178 +62,94 @@ model CatalogService {
 model CatalogMaterial {
   id          String         @id @default(cuid())
   name        String
-  description String?
-  serviceId   String
-  quantity    Float
-  unit        String?
+  quantity    Int            @default(1)
   price       Float
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  unit        String?
   reference   String?
   toChoose    Boolean        @default(false)
-  service     CatalogService @relation(fields: [serviceId], references: [id])
-}
-
-model DevisCatalog {
-  id          String          @id @default(cuid())
-  name        String
+  serviceId   String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   description String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  categories  DevisCategory[]
-}
-
-model DevisCategory {
-  id        String       @id @default(cuid())
-  name      String
-  catalogId String
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  catalog   DevisCatalog @relation(fields: [catalogId], references: [id])
+  service     CatalogService @relation(fields: [serviceId], references: [id])
 }
 
 model DevisSection {
   id             String         @id @default(cuid())
   name           String
-  materialsTotal Float
-  subTotal       Float
   devisId        String
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   category       String         @default("DEFAULT")
+  materialsTotal Float          @default(0)
   order          Int            @default(0)
+  subTotal       Float          @default(0)
   devis          Devis          @relation(fields: [devisId], references: [id])
   services       DevisService[]
-
-  @@index([devisId])
-  @@index([category])
 }
 
 model DevisService {
   id          String          @id @default(cuid())
   name        String
   description String?
-  sectionId   String
   price       Float
-  quantity    Int
+  quantity    Int             @default(1)
   unit        String?
-  order       Int             @default(0)
+  sectionId   String
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   category    String          @default("SERVICE")
+  order       Int             @default(0)
   tva         Float           @default(20)
   materials   DevisMaterial[]
   section     DevisSection    @relation(fields: [sectionId], references: [id])
-
-  @@index([sectionId])
-  @@index([category])
 }
 
 model DevisMaterial {
   id          String       @id @default(cuid())
+  name        String
+  description String?
+  quantity    Int          @default(1)
+  price       Float
+  unit        String?
+  reference   String?
+  serviceId   String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  name        String
-  price       Float
-  quantity    Float
-  serviceId   String
-  unit        String?
-  tva         Float        @default(20)
-  billable    Boolean      @default(false)
-  description String?
   order       Int          @default(0)
-  reference   String?
-  service     DevisService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-
-  @@index([serviceId])
-  @@index([reference])
+  tva         Float        @default(20)
+  billable    Boolean      @default(true)
+  service     DevisService @relation(fields: [serviceId], references: [id])
 }
 
 model Devis {
-  id                    String               @id @default(cuid())
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
-  number                Int
-  reference             String               @unique
-  year                  Int
-  status                String               @default("DRAFT")
-  catalogId             String
-  prescriberId          String?
-  expirationDate        DateTime?
-  paymentMethod         String?
-  pilot                 String               @default("Noureddine MLAIEH")
-  devisComments         String?
-  orderFormComments     String?
-  showDevisComments     Boolean              @default(true)
-  showOrderFormComments Boolean              @default(true)
-  clientId              String
-  showDescriptions      Boolean              @default(false)
-  projectType           String?              @default("AUTRE")
-  catalog               Catalog              @relation(fields: [catalogId], references: [id])
-  client                Client               @relation(fields: [clientId], references: [id])
-  prescriber            Prescriber?          @relation(fields: [prescriberId], references: [id])
-  sections              DevisSection[]
-  statusHistory         DevisStatusHistory[] @relation("DevisStatusHistories")
-  invoices              Invoice[]
-  sectionsLegacy        Section[]
-
-  @@index([status])
-  @@index([clientId])
-  @@index([catalogId])
-  @@index([year])
-  @@index([projectType])
-}
-
-model Section {
-  id             String    @id @default(cuid())
-  name           String
-  materialsTotal Float     @default(0)
-  subTotal       Float     @default(0)
-  devisId        String
-  devis          Devis     @relation(fields: [devisId], references: [id])
-  services       Service[]
-}
-
-model Service {
-  id           String     @id @default(cuid())
-  name         String
-  description  String?
-  quantity     Float      @default(0)
-  unit         String     @default("m²")
-  price        Float      @default(0)
-  tva          Float      @default(20)
-  amount       Float      @default(0)
-  categoryName String?
-  sectionId    String
-  materials    Material[]
-  section      Section    @relation(fields: [sectionId], references: [id])
-}
-
-model Material {
-  id        String  @id @default(cuid())
-  name      String
-  quantity  Float   @default(0)
-  price     Float   @default(0)
-  unit      String  @default("unité")
-  reference String?
-  tva       Float   @default(20)
-  serviceId String
-  service   Service @relation(fields: [serviceId], references: [id])
-}
-
-model DevisStatusHistory {
-  id        String   @id @default(cuid())
-  devisId   String
-  changedAt DateTime @default(now())
-  changedBy String
-  status    String
-  devis     Devis    @relation("DevisStatusHistories", fields: [devisId], references: [id])
-}
-
-model Sequence {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  value Int
+  id             String         @id @default(cuid())
+  number         String         @unique
+  year           Int            @default(2024)
+  reference      String?
+  status         DevisStatus    @default(DRAFT)
+  clientId       String
+  catalogId      String
+  totalHT        Float
+  totalTTC       Float
+  tva            Float          @default(20)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  prescriberId   String?
+  expirationDate DateTime?
+  paymentMethod  String?
+  pilot          String?
+  projectType    String?
+  devisComments  String?
+  showDevisComments Boolean     @default(false)
+  orderFormComments String?
+  showOrderFormComments Boolean  @default(false)
+  showDescriptions Boolean      @default(false)
+  catalog        Catalog        @relation(fields: [catalogId], references: [id])
+  client         Client         @relation(fields: [clientId], references: [id])
+  prescriber     Prescriber?    @relation(fields: [prescriberId], references: [id])
+  sections       DevisSection[]
+  invoices       Invoice[]
 }
 
 model Client {
@@ -245,28 +161,36 @@ model Client {
   city         String?
   postalCode   String?
   country      String?
-  company      String?
   notes        String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  company      String?
   prescriberId String?
   prescriber   Prescriber? @relation(fields: [prescriberId], references: [id])
   devis        Devis[]
-  invoices     Invoice[]
 }
 
 model Prescriber {
   id                         String   @id @default(cuid())
+  name                       String
+  email                      String?
+  phone                      String?
+  address                    String?
+  city                       String?
+  postalCode                 String?
+  country                    String?
+  company                    String?
   createdAt                  DateTime @default(now())
   updatedAt                  DateTime @updatedAt
   contact                    String?
-  cp                         String?
+  defaultAutoliquidation     Boolean  @default(false)
+  defaultBillToPrescriber    Boolean  @default(false)
+  defaultRetentionRate       Float    @default(5)
+  logo                       String?
   mail1                      String?
   mail2                      String?
   mail3                      String?
-  nom                        String
-  pays                       String?
-  rue                        String?
+  requiresRetentionGuarantee Boolean  @default(false)
   siret                      String?
   siteweb                    String?
   tel                        String?
@@ -274,125 +198,25 @@ model Prescriber {
   tel2                       String?
   tel3                       String?
   tva                        String?
-  ville                      String?
-  defaultAutoliquidation     Boolean  @default(false)
-  defaultBillToPrescriber    Boolean  @default(false)
-  defaultRetentionRate       Float    @default(5)
-  logo                       String?
-  requiresRetentionGuarantee Boolean  @default(false)
   clients                    Client[]
   devis                      Devis[]
 }
 
 model Invoice {
-  id                 String                  @id @default(cuid())
-  number             Int
-  year               Int
-  reference          String                  @unique
-  status             String                  @default("DRAFT")
-  devisId            String?
-  createdAt          DateTime                @default(now())
-  invoiceDate        DateTime                @default(now())
-  dueDate            DateTime?
-  paymentMethod      String?
-  paymentConditions  String?
-  paymentStatus      String                  @default("UNPAID")
-  autoliquidation    Boolean                 @default(false)
-  totalHT            Float
-  totalTVA           Float
-  totalTTC           Float
-  notes              String?
-  billToPrescriber   Boolean                 @default(false)
-  hidePrescriber     Boolean                 @default(false)
-  clientId           String
-  client             Client                  @relation(fields: [clientId], references: [id])
-  devis              Devis?                  @relation(fields: [devisId], references: [id])
-  paymentHistory     InvoicePaymentHistory[]
-  sections           InvoiceSection[]
-  statusHistory      InvoiceStatusHistory[]
-  retentionGuarantee RetentionGuarantee?
-}
-
-model InvoiceSection {
-  id        String        @id @default(cuid())
-  invoiceId String
-  name      String
-  subTotal  Float
-  items     InvoiceItem[]
-  invoice   Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-}
-
-model InvoiceItem {
-  id          String            @id @default(cuid())
-  sectionId   String
-  name        String
-  description String?
-  quantity    Float
-  unit        String
-  unitPrice   Float
-  tva         Float
-  amount      Float
-  section     InvoiceSection    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  materials   InvoiceMaterial[]
-}
-
-model InvoiceMaterial {
-  id        String      @id @default(cuid())
-  itemId    String
-  name      String
-  quantity  Float
-  price     Float
-  unit      String
-  reference String?
-  tva       Float
-  item      InvoiceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-}
-
-model Settings {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  value       String
-  description String?
-  category    String   @default("GENERAL")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model NumberingHistory {
-  id        String   @id @default(uuid())
-  type      String
-  number    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String?
-
-  @@index([type])
-  @@index([createdAt])
-}
-
-model RetentionGuarantee {
-  id          String             @id @default(cuid())
-  invoiceId   String             @unique
-  rate        Float
-  amount      Float
-  releaseDate DateTime?
-  status      String             @default("PENDING")
-  notes       String?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  invoice     Invoice            @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  releases    RetentionRelease[]
-}
-
-model RetentionRelease {
-  id          String             @id @default(cuid())
-  retentionId String
-  amount      Float
-  releaseDate DateTime           @default(now())
-  notes       String?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  retention   RetentionGuarantee @relation(fields: [retentionId], references: [id], onDelete: Cascade)
+  id             String                  @id @default(cuid())
+  number         String                  @unique
+  status         InvoiceStatus           @default(DRAFT)
+  devisId        String
+  totalHT        Float
+  totalTTC       Float
+  tva            Float                   @default(20)
+  paymentDate    DateTime?
+  dueDate        DateTime?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime
+  paymentStatus  PaymentStatus           @default(PENDING)
+  devis          Devis                   @relation(fields: [devisId], references: [id])
+  paymentHistory InvoicePaymentHistory[]
 }
 
 model CatalogProduct {
@@ -407,27 +231,27 @@ model CatalogProduct {
   @@unique([catalogId, productId])
 }
 
-model InvoiceStatusHistory {
-  id        String   @id @default(cuid())
-  invoiceId String
-  status    String
-  changedAt DateTime @default(now())
-  changedBy String
-  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+model InvoicePaymentHistory {
+  id            String        @id @default(cuid())
+  invoiceId     String
+  paymentStatus PaymentStatus
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id])
 }
 
-model InvoicePaymentHistory {
-  id            String   @id @default(cuid())
-  invoiceId     String
-  paymentStatus String
-  changedAt     DateTime @default(now())
-  changedBy     String
-  invoice       Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+model User {
+  id        String   @id
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
 }
 
 enum ProductCategory {
-  SERVICE
   MATERIAL
+  SERVICE
+  PRODUCT
 }
 
 enum DevisStatus {
@@ -435,5 +259,18 @@ enum DevisStatus {
   SENT
   ACCEPTED
   REJECTED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
   CANCELLED
 }

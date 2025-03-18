@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient, ProductCategory } from '@prisma/client';
+import { PrismaClient, _ProductCategory } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { RawExcelProductData, ValidatedProductData, ImportResult } from '@/types/ImportTypes';
 

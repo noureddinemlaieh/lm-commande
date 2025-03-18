@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
     // Préparer les données pour la création
     const createData = {
-      number: Number(data.number),
+      number: String(data.number),
       year: Number(data.year),
       reference: data.reference,
       status: data.status || 'DRAFT',
@@ -39,6 +39,8 @@ export async function POST(request: Request) {
       expirationDate: expirationDate,
       paymentMethod: data.paymentMethod || 'Virement bancaire',
       client: { connect: { id: data.clientId } },
+      totalHT: Number(data.totalHT) || 0,
+      totalTTC: Number(data.totalTTC) || 0
     };
 
     // Utiliser une transaction pour garantir l'intégrité des données

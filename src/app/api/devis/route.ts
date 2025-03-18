@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { DEVIS_STATUS } from '@/constants/devisStatus';
 import { getNextDevisNumber } from '@/services/devisSequence';
 import { generateDevisNumber } from '@/lib/devis';
+import { DevisStatus } from '@prisma/client';
 
 // Interfaces TypeScript strictes pour les données reçues
 interface DevisMaterialInput {
@@ -36,10 +37,10 @@ interface DevisSectionInput {
 }
 
 interface DevisInput {
-  number: number;
+  number: string;
   year: number;
   reference?: string;
-  status: string;
+  status: DevisStatus;
   clientId: string;
   catalogId: string;
   prescriberId?: string;
@@ -52,17 +53,19 @@ interface DevisInput {
   orderFormComments?: string;
   showOrderFormComments?: boolean;
   showDescriptions?: boolean;
+  tva?: number;
   sections: DevisSectionInput[];
 }
 
 export interface DevisCreateInput {
-  number: number;
+  number: string;
   year: number;
   reference: string;
-  status: string;
+  status: DevisStatus;
   clientId: string;
   catalogId: string;
   projectType?: string;
+  tva?: number;
   // ... autres champs
 }
 
@@ -285,27 +288,63 @@ export async function POST(request: Request) {
       try {
         // Obtenir le dernier numéro de devis pour cette année
         const lastDevis = await prisma.devis.findFirst({
-          where: { year },
+          where: {
+            AND: [
+              { year: year },
+              { catalogId: data.catalogId }
+            ]
+          },
           orderBy: { number: 'desc' },
           select: { number: true }
         });
         
-        number = lastDevis ? lastDevis.number + 1 : 1;
+        number = lastDevis ? (parseInt(lastDevis.number) + 1).toString() : "1";
       } catch (error) {
         console.error("Erreur lors de la détermination du numéro de devis:", error);
-        number = 1; // Valeur par défaut
+        number = "1"; // Valeur par défaut
       }
     }
 
     console.log(`Création du devis avec numéro ${number} et année ${year}`);
 
+    // Calculer les totaux
+    let totalHT = 0;
+    let totalTTC = 0;
+    const tva = safeNumber(data.tva, 20);
+
+    for (const section of data.sections) {
+      if (section.services) {
+        for (const service of section.services) {
+          const serviceHT = safeNumber(service.price) * safeNumber(service.quantity);
+          const serviceTVA = safeNumber(service.tva, tva);
+          const serviceTTC = serviceHT * (1 + serviceTVA / 100);
+          
+          totalHT += serviceHT;
+          totalTTC += serviceTTC;
+
+          if (service.materials) {
+            for (const material of service.materials) {
+              if (material.billable) {
+                const materialHT = safeNumber(material.price) * safeNumber(material.quantity);
+                const materialTVA = safeNumber(material.tva, tva);
+                const materialTTC = materialHT * (1 + materialTVA / 100);
+                
+                totalHT += materialHT;
+                totalTTC += materialTTC;
+              }
+            }
+          }
+        }
+      }
+    }
+
     // Créer le devis avec la référence générée
     const devis = await prisma.devis.create({
       data: {
-        number: safeNumber(number),
+        number: safeString(number),
         year: safeNumber(year),
-        reference: safeString(reference), // Utiliser la référence générée
-        status: safeString(data.status, 'DRAFT'),
+        reference: safeString(reference),
+        status: data.status || 'DRAFT' as DevisStatus,
         clientId: safeString(data.clientId),
         catalogId: safeString(data.catalogId),
         prescriberId: data.prescriberId ? safeString(data.prescriberId) : undefined,
@@ -318,6 +357,9 @@ export async function POST(request: Request) {
         orderFormComments: data.orderFormComments ? safeString(data.orderFormComments) : null,
         showOrderFormComments: safeBoolean(data.showOrderFormComments, true),
         showDescriptions: safeBoolean(data.showDescriptions, false),
+        totalHT: totalHT,
+        totalTTC: totalTTC,
+        tva: tva,
         // Créer les sections
         sections: {
           create: data.sections.map((section: DevisSectionInput, sectionIndex: number) => ({

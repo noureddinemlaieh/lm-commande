@@ -1,18 +1,34 @@
-import React from 'react';
+import React, { ComponentType } from 'react';
 import dynamic from 'next/dynamic';
 
-// Fonction pour charger dynamiquement les composants avec options
-export const dynamicComponent = (importFunc: () => Promise<any>, options = {}) => {
-  return dynamic(importFunc, {
-    ssr: false, // Désactiver le rendu côté serveur pour les composants lourds
-    loading: () => React.createElement('div', { className: 'loading-component' }, 'Chargement...'),
-    ...options,
-  });
-};
+interface DynamicOptions {
+  ssr?: boolean;
+  loading?: ComponentType;
+}
 
-// Précharger les composants fréquemment utilisés
-export const preloadComponent = (importFunc: () => Promise<any>) => {
-  // Cette fonction peut être appelée dans les pages pour précharger les composants
-  // avant qu'ils ne soient nécessaires
-  importFunc();
-}; 
+/**
+ * Charge dynamiquement un composant avec des options
+ * @param importFunc - Fonction d'import du composant
+ * @param options - Options de chargement dynamique
+ * @returns Composant chargé dynamiquement
+ */
+export function dynamicComponent<Props>(
+  importFunc: () => Promise<{ default: ComponentType<Props> }>,
+  options: DynamicOptions = {}
+) {
+  return dynamic(importFunc, {
+    ssr: options.ssr ?? false,
+    loading: options.loading,
+  });
+}
+
+/**
+ * Précharge un composant fréquemment utilisé
+ * @param importFunc - Fonction d'import du composant
+ */
+export function preloadComponent<Props>(
+  importFunc: () => Promise<{ default: ComponentType<Props> }>
+) {
+  const component = importFunc();
+  return component;
+} 

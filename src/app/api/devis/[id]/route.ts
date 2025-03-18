@@ -61,15 +61,15 @@ export async function GET(
       }
     });
 
-    // Si le devis n'a pas de référence, générer une référence temporaire
-    if (devis && !devis.reference) {
-      // Utiliser le format "DEVIS-{id}" comme référence temporaire
-      devis.reference = `DEVIS-${devis.id.substring(0, 8)}`;
+    // Si le devis n'a pas de numéro, générer un numéro temporaire
+    if (devis && !devis.number) {
+      // Utiliser le format "DEVIS-{id}" comme numéro temporaire
+      devis.number = `DEVIS-${devis.id.substring(0, 8)}`;
       
-      // Optionnel: mettre à jour la référence dans la base de données
+      // Optionnel: mettre à jour le numéro dans la base de données
       await prisma.devis.update({
         where: { id: params.id },
-        data: { reference: devis.reference }
+        data: { number: devis.number }
       });
     }
 
@@ -82,7 +82,7 @@ export async function GET(
       );
     }
 
-    console.log('Devis récupéré avec succès:', devis.id, 'Référence:', devis.reference);
+    console.log('Devis récupéré avec succès:', devis.id, 'Numéro:', devis.number);
     return NextResponse.json(devis);
   } catch (error) {
     console.error('Erreur détaillée lors de la récupération du devis:', error);
@@ -160,6 +160,8 @@ export async function PUT(
         showOrderFormComments: data.showOrderFormComments,
         showDescriptions: data.showDescriptions,
         projectType: data.projectType || 'AUTRE',
+        totalHT: data.totalHT || 0,
+        totalTTC: data.totalTTC || 0,
       }
     });
     
@@ -323,7 +325,6 @@ export async function POST(request: Request) {
     const devis = await prisma.devis.create({
       data: {
         number: data.number,
-        year: data.year,
         reference: data.reference,
         status: data.status || 'DRAFT',
         client: { connect: { id: data.clientId } },
@@ -333,6 +334,8 @@ export async function POST(request: Request) {
         pilot: data.pilot,
         projectType: data.projectType || 'AUTRE',
         catalog: data.catalogId ? { connect: { id: data.catalogId } } : { connect: { id: "default-catalog-id" } },
+        totalHT: data.totalHT || 0,
+        totalTTC: data.totalTTC || 0,
         sections: {
           create: data.sections.map((section: any) => ({
             name: section.name,
