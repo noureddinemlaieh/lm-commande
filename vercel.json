@@ -1,4 +1,11 @@
 {
-  "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install"
+  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "builds": [
+    {
+      "src": "prisma/schema.prisma",
+      "use": "@vercel/static-build"
+    }
+  ]
 } 
