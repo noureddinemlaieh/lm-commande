@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
     - uses: actions/checkout@v4
@@ -23,6 +25,10 @@ jobs:
       
     - name: Generate Prisma Client
       run: npx prisma generate
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
     - name: Build
       run: npm run build
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
