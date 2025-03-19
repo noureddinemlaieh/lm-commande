@@ -419,28 +419,28 @@ export default function NewDevisPage() {
 
   // Fonction pour gérer le changement de quantité des matériaux
   const handleMaterialQuantityChange = (sectionId: string, prestationId: string, materialId: string, quantity: number) => {
-    setSections(prevSections => {
-      return prevSections.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            prestations: section.prestations.map(prestation => {
-              if (prestation.id === prestationId) {
-                return {
-                  ...prestation,
+      setSections(prevSections => {
+        return prevSections.map(section => {
+      if (section.id === sectionId) {
+        return {
+          ...section,
+          prestations: section.prestations.map(prestation => {
+            if (prestation.id === prestationId) {
+              return {
+                ...prestation,
                   materials: prestation.materials.map(material => {
                     if (material.id === materialId) {
                       return { ...material, quantity };
                     }
                     return material;
                   })
-                };
-              }
-              return prestation;
-            })
-          };
-        }
-        return section;
+              };
+            }
+            return prestation;
+          })
+        };
+      }
+      return section;
       });
     });
 
@@ -452,26 +452,26 @@ export default function NewDevisPage() {
   const handleMaterialUnitChange = (sectionId: string, prestationId: string, materialId: string, unit: string) => {
     setSections(prevSections => {
       return prevSections.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            prestations: section.prestations.map(prestation => {
-              if (prestation.id === prestationId) {
-                return {
-                  ...prestation,
-                  materials: prestation.materials.map(material => {
-                    if (material.id === materialId) {
+      if (section.id === sectionId) {
+        return {
+          ...section,
+          prestations: section.prestations.map(prestation => {
+            if (prestation.id === prestationId) {
+              return {
+                ...prestation,
+                materials: prestation.materials.map(material => {
+                  if (material.id === materialId) {
                       return { ...material, unit };
-                    }
-                    return material;
-                  })
-                };
-              }
-              return prestation;
-            })
-          };
-        }
-        return section;
+                  }
+                  return material;
+                })
+              };
+            }
+            return prestation;
+          })
+        };
+      }
+      return section;
       });
     });
   };
@@ -480,26 +480,26 @@ export default function NewDevisPage() {
   const handleMaterialTVAChange = (sectionId: string, prestationId: string, materialId: string, tva: number) => {
     setSections(prevSections => {
       return prevSections.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            prestations: section.prestations.map(prestation => {
-              if (prestation.id === prestationId) {
-                return {
-                  ...prestation,
+      if (section.id === sectionId) {
+        return {
+          ...section,
+          prestations: section.prestations.map(prestation => {
+            if (prestation.id === prestationId) {
+              return {
+                ...prestation,
                   materials: prestation.materials.map(material => {
                     if (material.id === materialId) {
                       return { ...material, tva };
                     }
                     return material;
                   })
-                };
-              }
-              return prestation;
-            })
-          };
-        }
-        return section;
+              };
+            }
+            return prestation;
+          })
+        };
+      }
+      return section;
       });
     });
 
@@ -511,26 +511,26 @@ export default function NewDevisPage() {
   const handleMaterialBillableChange = (sectionId: string, prestationId: string, materialId: string, billable: boolean) => {
     setSections(prevSections => {
       return prevSections.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            prestations: section.prestations.map(prestation => {
-              if (prestation.id === prestationId) {
-                return {
-                  ...prestation,
-                  materials: prestation.materials.map(material => {
-                    if (material.id === materialId) {
+      if (section.id === sectionId) {
+        return {
+          ...section,
+          prestations: section.prestations.map(prestation => {
+            if (prestation.id === prestationId) {
+              return {
+                ...prestation,
+                materials: prestation.materials.map(material => {
+                  if (material.id === materialId) {
                       return { ...material, billable };
-                    }
-                    return material;
-                  })
-                };
-              }
-              return prestation;
-            })
-          };
-        }
-        return section;
+                  }
+                  return material;
+                })
+              };
+            }
+            return prestation;
+          })
+        };
+      }
+      return section;
       });
     });
 
@@ -542,22 +542,22 @@ export default function NewDevisPage() {
   const handlePrestationQuantityChange = (sectionId: string, prestationId: string, quantity: number) => {
     setSections(prevSections => {
       return prevSections.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            prestations: section.prestations.map(prestation => {
-              if (prestation.id === prestationId) {
-                return {
-                  ...prestation,
+      if (section.id === sectionId) {
+        return {
+          ...section,
+          prestations: section.prestations.map(prestation => {
+            if (prestation.id === prestationId) {
+              return {
+                ...prestation,
                   quantity: quantity,
                   amount: quantity * prestation.unitPrice
-                };
-              }
-              return prestation;
-            })
-          };
-        }
-        return section;
+              };
+            }
+            return prestation;
+          })
+        };
+      }
+      return section;
       });
     });
 
@@ -664,7 +664,7 @@ export default function NewDevisPage() {
         // Calcul pour les matériaux
         prestation.materials.forEach((material: any) => {
           if (material.billable !== false) {
-            const materialHT = material.quantity * material.price;
+          const materialHT = material.quantity * material.price;
             const materialTVA = (materialHT * material.tva) / 100;
             
             acc.materials.totalHT += materialHT;
@@ -721,7 +721,7 @@ export default function NewDevisPage() {
     }
     
     // Activer l'indicateur de chargement
-    setIsLoading(true);
+      setIsLoading(true);
     setIsReloadingCategories(true);
     
     try {
@@ -781,20 +781,20 @@ export default function NewDevisPage() {
     while (retries > 0) {
       try {
         const response = await fetch('/api/devis-templates');
-        if (!response.ok) {
-          const errorData = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
           console.error('Erreur API:', errorData);
           throw new Error(errorData.error || 'Erreur lors du chargement des modèles');
         }
         const data = await response.json();
         setTemplates(data);
         return;
-      } catch (error) {
+    } catch (error) {
         console.error(`Erreur (tentative ${4 - retries}/3):`, error);
         retries--;
         if (retries === 0) {
           message.error('Impossible de charger les modèles de devis après plusieurs tentatives');
-        } else {
+      } else {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Attendre 1s avant de réessayer
         }
       }
@@ -883,7 +883,7 @@ export default function NewDevisPage() {
       setProducts(productsWithCategories); // Tous les produits
       
       console.log('Nombre total de produits chargés:', productsWithCategories.length);
-    } catch (error) {
+      } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
       message.error('Impossible de charger les produits');
     }
@@ -979,7 +979,7 @@ export default function NewDevisPage() {
             throw new Error('Erreur lors du chargement du catalogue');
           }
           const catalogData = await response.json();
-          
+
           if (!catalogData.categories || catalogData.categories.length === 0) {
             console.log('Le catalogue ne contient aucune catégorie');
             setPrestations([]);
