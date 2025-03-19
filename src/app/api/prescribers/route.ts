@@ -3,8 +3,16 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const prescribers = await prisma.prescriber.findMany();
+    const prescribers = await prisma.prescriber.findMany({
+      orderBy: {
+        name: 'asc'
+      }
+    });
     
+    if (!prescribers || prescribers.length === 0) {
+      return NextResponse.json([]);
+    }
+
     // Transformer les résultats pour correspondre au format attendu par le frontend
     const transformedPrescribers = prescribers.map(p => ({
       id: p.id,
@@ -33,16 +41,13 @@ export async function GET() {
       updatedAt: p.updatedAt
     }));
     
-    // Trier les résultats côté serveur
-    transformedPrescribers.sort((a, b) => a.nom.localeCompare(b.nom));
-    
     return NextResponse.json(transformedPrescribers);
   } catch (error) {
     console.error('Erreur lors de la récupération des prescripteurs:', error);
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des prescripteurs' },
       { status: 500 }
-    );  
+    );
   }
 }
 

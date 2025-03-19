@@ -314,32 +314,50 @@ export async function POST(request: Request) {
     // Calculer les totaux
     let totalHT = 0;
     let totalTTC = 0;
-    const tva = safeNumber(data.tva, 20);
+    const tva = data.tva || 20;
 
+    // Calculer les totaux pour chaque section
     for (const section of data.sections) {
-      if (section.services) {
-        for (const service of section.services) {
-          const serviceHT = safeNumber(service.price) * safeNumber(service.quantity);
-          const serviceTVA = safeNumber(service.tva, tva);
-          const serviceTTC = serviceHT * (1 + serviceTVA / 100);
-          
-          totalHT += serviceHT;
-          totalTTC += serviceTTC;
+      let sectionTotalHT = 0;
+      let sectionTotalTTC = 0;
 
-          if (service.materials) {
-            for (const material of service.materials) {
-              if (material.billable) {
-                const materialHT = safeNumber(material.price) * safeNumber(material.quantity);
-                const materialTVA = safeNumber(material.tva, tva);
-                const materialTTC = materialHT * (1 + materialTVA / 100);
-                
-                totalHT += materialHT;
-                totalTTC += materialTTC;
-              }
-            }
+      // Calculer les totaux pour chaque service
+      for (const service of section.services) {
+        const serviceQuantity = safeNumber(service.quantity, 1);
+        const servicePrice = safeNumber(service.price, 0);
+        const serviceTVA = safeNumber(service.tva, tva);
+        
+        // Calculer le total HT du service
+        const serviceTotalHT = serviceQuantity * servicePrice;
+        sectionTotalHT += serviceTotalHT;
+
+        // Calculer le total TTC du service
+        const serviceTotalTTC = serviceTotalHT * (1 + serviceTVA / 100);
+        sectionTotalTTC += serviceTotalTTC;
+
+        // Calculer les totaux des matériaux
+        if (Array.isArray(service.materials)) {
+          for (const material of service.materials) {
+            const materialQuantity = safeNumber(material.quantity, 1);
+            const materialPrice = safeNumber(material.price, 0);
+            const materialTVA = safeNumber(material.tva, tva);
+            
+            const materialTotalHT = materialQuantity * materialPrice;
+            sectionTotalHT += materialTotalHT;
+            
+            const materialTotalTTC = materialTotalHT * (1 + materialTVA / 100);
+            sectionTotalTTC += materialTotalTTC;
           }
         }
       }
+
+      // Mettre à jour les totaux de la section
+      section.materialsTotal = sectionTotalHT;
+      section.subTotal = sectionTotalTTC;
+      
+      // Ajouter les totaux de la section aux totaux globaux
+      totalHT += sectionTotalHT;
+      totalTTC += sectionTotalTTC;
     }
 
     // Créer le devis avec la référence générée
@@ -366,39 +384,34 @@ export async function POST(request: Request) {
         tva: tva,
         // Créer les sections
         sections: {
-          create: data.sections.map((section: DevisSectionInput, sectionIndex: number) => ({
+          create: Array.isArray(data.sections) ? data.sections.map((section: DevisSectionInput) => ({
             name: safeString(section.name),
             materialsTotal: safeNumber(section.materialsTotal),
-            subTotal: safeNumber(section.subTotal), 
+            subTotal: safeNumber(section.subTotal),
             category: safeString(section.category, 'DEFAULT'),
-            order: sectionIndex, // Utiliser l'index comme ordre par défaut
-            // Créer les services (anciennement prestations)
             services: {
-              create: Array.isArray(section.services) ? section.services.map((service: DevisServiceInput, serviceIndex: number) => ({
+              create: Array.isArray(section.services) ? section.services.map((service: DevisServiceInput) => ({
                 name: safeString(service.name),
                 description: safeString(service.description),
-                quantity: safeNumber(service.quantity),
-                unit: safeString(service.unit),
-                price: safeNumber(service.price),
+                quantity: safeNumber(service.quantity, 1),
+                price: safeNumber(service.price, 0),
+                unit: safeString(service.unit, 'm²'),
                 tva: safeNumber(service.tva, 20),
-                order: serviceIndex,
-                category: safeString(service.category || service.categoryName, 'SERVICE'),
-                // Créer les matériaux
+                catalogId: data.catalogId,
+                categoryId: null,
                 materials: {
-                  create: Array.isArray(service.materials) ? service.materials.map((material: DevisMaterialInput, materialIndex: number) => ({
+                  create: Array.isArray(service.materials) ? service.materials.map((material: DevisMaterialInput) => ({
                     name: safeString(material.name),
-                    quantity: safeNumber(material.quantity),
-                    price: safeNumber(material.price),
-                    unit: safeString(material.unit),
+                    quantity: safeNumber(material.quantity, 1),
+                    price: safeNumber(material.price, 0),
+                    unit: safeString(material.unit, 'm²'),
                     reference: safeString(material.reference),
-                    tva: safeNumber(material.tva, 20),
-                    order: materialIndex,
-                    billable: safeBoolean(material.billable, false)
+                    tva: safeNumber(material.tva, 20)
                   })) : []
                 }
               })) : []
             }
-          }))
+          })) : []
         }
       },
       include: {
@@ -490,7 +503,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
                   price: safeNumber(service.unitPrice || service.price),
                   tva: safeNumber(service.tva, 20),
                   order: serviceIndex,
-                  category: safeString(service.category || service.categoryName, 'SERVICE'),
+                  categoryId: service.categoryId || null,
+                  catalogId: body.catalogId,
                   materials: {
                     create: Array.isArray(service.materials) ? service.materials.map((material: any, materialIndex: number) => ({
                       name: safeString(material.name),
@@ -506,17 +520,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
                 })) : []
             }
           })) : []
-        }
-      },
-      include: {
-        sections: {
-          include: {
-            services: {
-              include: {
-                materials: true
-              }
-            }
-          }
         }
       }
     });

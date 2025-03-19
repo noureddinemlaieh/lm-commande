@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "DevisMaterial" ADD COLUMN     "tva" DOUBLE PRECISION NOT NULL DEFAULT 20;

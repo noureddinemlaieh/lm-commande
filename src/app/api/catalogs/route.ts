@@ -4,23 +4,15 @@ import prisma from '@/lib/prisma';
 export async function GET() {
   try {
     const catalogs = await prisma.catalog.findMany({
-      include: {
-        categories: {
-          include: {
-            services: {
-              include: {
-                materials: true // Inclure aussi les matériaux si nécessaire
-              }
-            }
-          },
-          orderBy: {
-            order: 'asc'
-          }
-        }
+      select: {
+        id: true,
+        name: true
+      },
+      orderBy: {
+        name: 'asc'
       }
     });
-    
-    console.log('Catalogues et services chargés:', JSON.stringify(catalogs, null, 2));
+
     return NextResponse.json(catalogs);
   } catch (error) {
     console.error('Erreur lors de la récupération des catalogues:', error);

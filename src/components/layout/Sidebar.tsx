@@ -63,6 +63,18 @@ export const Sidebar = () => {
       href: '/devis',
       label: 'Devis',
       icon: <FileOutlined />,
+      children: [
+        {
+          href: '/devis',
+          label: 'Liste des devis',
+          icon: <FileOutlined />,
+        },
+        {
+          href: '/devis-templates',
+          label: 'Modèles',
+          icon: <FileOutlined />,
+        }
+      ]
     },
     {
       href: '/invoices',

@@ -89,37 +89,38 @@ model DevisSection {
 }
 
 model DevisService {
-  id          String          @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
+  quantity    Float    @default(1)
   price       Float
-  quantity    Int             @default(1)
-  unit        String?
-  sectionId   String
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  category    String          @default("SERVICE")
-  order       Int             @default(0)
-  tva         Float           @default(20)
+  unit        String   @default("m²")
+  tva         Float    @default(20)
+  categoryId  String?
+  catalogId   String
+  order       Int      @default(0)
   materials   DevisMaterial[]
-  section     DevisSection    @relation(fields: [sectionId], references: [id])
+  section     DevisSection @relation(fields: [sectionId], references: [id])
+  sectionId   String
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model DevisMaterial {
-  id          String       @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  description String?
-  quantity    Int          @default(1)
   price       Float
-  unit        String?
+  quantity    Float    @default(1)
+  unit        String   @default("m²")
   reference   String?
-  serviceId   String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  order       Int          @default(0)
-  tva         Float        @default(20)
-  billable    Boolean      @default(true)
+  tva         Float    @default(20)
+  order       Int      @default(0)
   service     DevisService @relation(fields: [serviceId], references: [id])
+  serviceId   String
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Devis {
@@ -206,7 +207,7 @@ model Invoice {
   id             String                  @id @default(cuid())
   number         String                  @unique
   status         InvoiceStatus           @default(DRAFT)
-  devisId        String
+  devisId        String                  @unique
   totalHT        Float
   totalTTC       Float
   tva            Float                   @default(20)
@@ -217,6 +218,7 @@ model Invoice {
   paymentStatus  PaymentStatus           @default(PENDING)
   devis          Devis                   @relation(fields: [devisId], references: [id])
   paymentHistory InvoicePaymentHistory[]
+  retentionGuarantee RetentionGuarantee?
 }
 
 model CatalogProduct {
@@ -240,12 +242,73 @@ model InvoicePaymentHistory {
   invoice       Invoice       @relation(fields: [invoiceId], references: [id])
 }
 
+model RetentionGuarantee {
+  id          String    @id @default(cuid())
+  invoiceId   String    @unique
+  rate        Float
+  amount      Float
+  releaseDate DateTime?
+  notes       String?
+  status      String    @default("PENDING")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id])
+}
+
 model User {
   id        String   @id
   email     String   @unique
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime
+}
+
+model DevisTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  sections    DevisTemplateSection[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DevisTemplateSection {
+  id          String   @id @default(cuid())
+  name        String
+  services    DevisTemplateService[]
+  template    DevisTemplate @relation(fields: [templateId], references: [id])
+  templateId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DevisTemplateService {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  quantity    Float    @default(1)
+  unit        String   @default("m²")
+  tva         Float    @default(20)
+  materials   DevisTemplateMaterial[]
+  section     DevisTemplateSection @relation(fields: [sectionId], references: [id])
+  sectionId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DevisTemplateMaterial {
+  id          String   @id @default(cuid())
+  name        String
+  price       Float
+  quantity    Float    @default(1)
+  unit        String   @default("m²")
+  tva         Float    @default(20)
+  reference   String?
+  service     DevisTemplateService @relation(fields: [serviceId], references: [id])
+  serviceId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum ProductCategory {

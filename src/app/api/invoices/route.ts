@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
     const invoices = await prisma.invoice.findMany({
       where,
       include: {
-        client: true,
         devis: {
           select: {
-            reference: true
+            reference: true,
+            client: true
           }
         }
       },
@@ -34,21 +34,15 @@ export async function GET(request: NextRequest) {
     const formattedInvoices = invoices.map(invoice => ({
       id: invoice.id,
       number: invoice.number,
-      year: invoice.year,
-      reference: invoice.reference,
       status: invoice.status,
-      clientId: invoice.clientId,
-      client: invoice.client,
       devisId: invoice.devisId,
+      client: invoice.devis?.client,
       devisReference: invoice.devis?.reference,
       createdAt: invoice.createdAt.toISOString(),
       dueDate: invoice.dueDate?.toISOString(),
-      paymentMethod: invoice.paymentMethod,
       paymentStatus: invoice.paymentStatus,
       totalHT: invoice.totalHT,
-      totalTVA: invoice.totalTVA,
-      totalTTC: invoice.totalTTC,
-      notes: invoice.notes
+      totalTTC: invoice.totalTTC
     }));
     
     return NextResponse.json(formattedInvoices);
@@ -109,7 +103,7 @@ export async function POST(request: NextRequest) {
       } else {
         // Si l'API de séquence échoue, générer un numéro manuellement
         const result = await getNextInvoiceNumber();
-        number = result.number;
+        number = parseInt(String(result.number), 10);
         
         // Forcer le format FAC-XXX
         reference = `FAC-${String(number).padStart(3, '0')}`;

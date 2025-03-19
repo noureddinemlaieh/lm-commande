@@ -4,7 +4,6 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Select, Spin, Form, Card, Button, Modal, Input, Checkbox, App, Tooltip, InputNumber, Dropdown } from 'antd';
 import type { SelectProps } from 'antd';
 import { getNextDevisNumber } from '@/utils/devisSequence';
-import { Catalog, Service } from '@/types/Catalog';
 import type { Client } from '@/types/Client';
 import React from 'react';
 import { DownOutlined, RightOutlined, PrinterOutlined, EyeOutlined, FileTextOutlined, DollarOutlined, PlusOutlined, DeleteOutlined, SaveOutlined, WarningOutlined, ArrowUpOutlined, ArrowDownOutlined, MoreOutlined, ReloadOutlined } from '@ant-design/icons';
@@ -26,7 +25,7 @@ import ServiceCreator from '@/components/catalogs/ServiceCreator';
 import ServiceForm from '@/components/catalogs/ServiceForm';
 import CategoryCreator from '@/components/catalogs/CategoryCreator';
 import { ProductCategory } from '@/types/Product';
-
+import { Catalog, Service } from '@/types/Catalog';
 interface DevisNumber {
   number: number;
   year: number;
@@ -283,6 +282,8 @@ export default function NewDevisPage() {
   const [sections, setSections] = useState<Section[]>([]);
   const [prestations, setPrestations] = useState<CatalogPrestation[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [totals, setTotals] = useState<Totals>({
     totalHT: 0,
     totalTVA: 0,
@@ -375,6 +376,336 @@ export default function NewDevisPage() {
   // Ajouter une référence pour le debounce de la recherche
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Fonction pour gérer la mise à jour des références des matériaux
+  const handleMaterialReferenceChange = (sectionId: string, prestationId: string, materialId: string, reference: string) => {
+    console.log('Mise à jour de la référence:', { sectionId, prestationId, materialId, reference });
+    
+    setSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  materials: prestation.materials.map(material => {
+                    if (material.id === materialId) {
+                      return { ...material, reference };
+                    }
+                    return material;
+                  })
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+    });
+
+    // Mettre à jour materialsWithReferences si nécessaire
+    setMaterialsWithReferences(prevMaterials => {
+      const existingIndex = prevMaterials.findIndex(m => m.id === materialId);
+      if (existingIndex >= 0) {
+        return prevMaterials.map((m, index) => 
+          index === existingIndex ? { ...m, reference } : m
+        );
+      }
+      return prevMaterials;
+    });
+  };
+
+  // Fonction pour gérer le changement de quantité des matériaux
+  const handleMaterialQuantityChange = (sectionId: string, prestationId: string, materialId: string, quantity: number) => {
+    setSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  materials: prestation.materials.map(material => {
+                    if (material.id === materialId) {
+                      return { ...material, quantity };
+                    }
+                    return material;
+                  })
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+    });
+
+    // Recalculer les totaux après le changement
+    calculateTotals(sections);
+  };
+
+  // Fonction pour gérer le changement d'unité des matériaux
+  const handleMaterialUnitChange = (sectionId: string, prestationId: string, materialId: string, unit: string) => {
+    setSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  materials: prestation.materials.map(material => {
+                    if (material.id === materialId) {
+                      return { ...material, unit };
+                    }
+                    return material;
+                  })
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+    });
+  };
+
+  // Fonction pour gérer le changement de TVA des matériaux
+  const handleMaterialTVAChange = (sectionId: string, prestationId: string, materialId: string, tva: number) => {
+    setSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  materials: prestation.materials.map(material => {
+                    if (material.id === materialId) {
+                      return { ...material, tva };
+                    }
+                    return material;
+                  })
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+    });
+
+    // Recalculer les totaux après le changement
+    calculateTotals(sections);
+  };
+
+  // Fonction pour gérer le changement de l'état facturable des matériaux
+  const handleMaterialBillableChange = (sectionId: string, prestationId: string, materialId: string, billable: boolean) => {
+    setSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  materials: prestation.materials.map(material => {
+                    if (material.id === materialId) {
+                      return { ...material, billable };
+                    }
+                    return material;
+                  })
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+    });
+
+    // Recalculer les totaux après le changement
+    calculateTotals(sections);
+  };
+
+  // Fonction pour gérer le changement de quantité des prestations
+  const handlePrestationQuantityChange = (sectionId: string, prestationId: string, quantity: number) => {
+    setSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  quantity: quantity,
+                  amount: quantity * prestation.unitPrice
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+    });
+
+    // Recalculer les totaux après le changement
+    calculateTotals(sections);
+  };
+
+  // Fonction pour gérer le changement de prix des prestations
+  const handlePriceChange = (sectionId: string, prestationId: string, price: number) => {
+    setSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  unitPrice: price,
+                  amount: prestation.quantity * price
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+    });
+
+    // Recalculer les totaux après le changement
+    calculateTotals(sections);
+  };
+
+  // Fonction pour gérer le changement de TVA des prestations
+  const handleTVAChange = (sectionId: string, prestationId: string, tva: number) => {
+    setSections(prevSections => {
+      return prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  tva: tva
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+    });
+
+    // Recalculer les totaux après le changement
+    calculateTotals(sections);
+  };
+
+  // Fonction pour calculer tous les totaux
+  const calculateTotals = (currentSections: any[]) => {
+    const initialTotals = {
+      totalHT: 0,
+      totalTVA: 0,
+      totalTTC: 0,
+      services: {
+        totalHT: 0,
+        totalTVA: 0,
+        totalTTC: 0,
+        tvaDetails: [] as { taux: number; tva: number }[]
+      },
+      materials: {
+        totalHT: 0,
+        totalTVA: 0,
+        totalTTC: 0,
+        tvaDetails: [] as { taux: number; tva: number }[]
+      }
+    };
+
+    const updatedTotals = currentSections.reduce((acc, section) => {
+      section.prestations.forEach((prestation: any) => {
+        // Calcul pour les services
+        const serviceHT = prestation.quantity * prestation.unitPrice;
+        const serviceTVA = (serviceHT * prestation.tva) / 100;
+        
+        acc.services.totalHT += serviceHT;
+        acc.services.totalTVA += serviceTVA;
+        
+        // Mise à jour des détails TVA pour les services
+        const existingServiceTVADetail = acc.services.tvaDetails.find(
+          (detail: any) => detail.taux === prestation.tva
+        );
+        
+        if (existingServiceTVADetail) {
+          existingServiceTVADetail.tva += serviceTVA;
+        } else {
+          acc.services.tvaDetails.push({
+            taux: prestation.tva,
+            tva: serviceTVA
+          });
+        }
+
+        // Calcul pour les matériaux
+        prestation.materials.forEach((material: any) => {
+          if (material.billable !== false) {
+            const materialHT = material.quantity * material.price;
+            const materialTVA = (materialHT * material.tva) / 100;
+            
+            acc.materials.totalHT += materialHT;
+            acc.materials.totalTVA += materialTVA;
+            
+            // Mise à jour des détails TVA pour les matériaux
+            const existingMaterialTVADetail = acc.materials.tvaDetails.find(
+              (detail: any) => detail.taux === material.tva
+            );
+            
+            if (existingMaterialTVADetail) {
+              existingMaterialTVADetail.tva += materialTVA;
+            } else {
+              acc.materials.tvaDetails.push({
+                taux: material.tva,
+                tva: materialTVA
+              });
+            }
+          }
+        });
+      });
+
+      return acc;
+    }, initialTotals);
+
+    // Trier les détails de TVA par taux
+    updatedTotals.services.tvaDetails.sort((a: any, b: any) => a.taux - b.taux);
+    updatedTotals.materials.tvaDetails.sort((a: any, b: any) => a.taux - b.taux);
+
+    // Calculer les totaux finaux
+    updatedTotals.services.totalTTC = updatedTotals.services.totalHT + updatedTotals.services.totalTVA;
+    updatedTotals.materials.totalTTC = updatedTotals.materials.totalHT + updatedTotals.materials.totalTVA;
+    
+    updatedTotals.totalHT = updatedTotals.services.totalHT + updatedTotals.materials.totalHT;
+    updatedTotals.totalTVA = updatedTotals.services.totalTVA + updatedTotals.materials.totalTVA;
+    updatedTotals.totalTTC = updatedTotals.services.totalTTC + updatedTotals.materials.totalTTC;
+
+    setTotals(updatedTotals);
+    return updatedTotals;
+  };
+
   // Surveiller les changements dans catalogCategories
   useEffect(() => {
     console.log('État catalogCategories mis à jour:', catalogCategories);
@@ -445,27 +776,47 @@ export default function NewDevisPage() {
     `,
   });
 
-  useEffect(() => {
-    const loadCatalogs = async () => {
+  const loadTemplates = async () => {
+    let retries = 3;
+    while (retries > 0) {
       try {
-        setCatalogsLoading(true);
-        const response = await fetch('/api/catalogs');
+        const response = await fetch('/api/devis-templates');
         if (!response.ok) {
-          throw new Error('Erreur lors du chargement des catalogues');
+          const errorData = await response.json();
+          console.error('Erreur API:', errorData);
+          throw new Error(errorData.error || 'Erreur lors du chargement des modèles');
         }
         const data = await response.json();
-        console.log('Catalogues chargés:', data);
-        setCatalogs(data);
+        setTemplates(data);
+        return;
       } catch (error) {
-        console.error('Erreur lors du chargement des catalogues:', error);
-        setError('Impossible de charger les catalogues');
-      } finally {
-        setCatalogsLoading(false);
+        console.error(`Erreur (tentative ${4 - retries}/3):`, error);
+        retries--;
+        if (retries === 0) {
+          message.error('Impossible de charger les modèles de devis après plusieurs tentatives');
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Attendre 1s avant de réessayer
+        }
       }
-    };
+    }
+  };
 
-    loadCatalogs();
-  }, []);
+  const loadCatalogs = useCallback(async () => {
+    try {
+      setCatalogsLoading(true);
+      const response = await fetch('/api/catalogs');
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des catalogues');
+      }
+      const data = await response.json();
+      setCatalogs(data);
+    } catch (error) {
+      console.error('Erreur:', error);
+      message.error('Impossible de charger les catalogues');
+    } finally {
+      setCatalogsLoading(false);
+    }
+  }, [setCatalogs, setCatalogsLoading, message]);
 
   const fetchDevisNumber = useCallback(async () => {
     try {
@@ -538,1188 +889,88 @@ export default function NewDevisPage() {
     }
   }, [setAvailableMaterials, setProducts, message]);
 
-  const loadPrescribers = useCallback(async () => {
-    try {
-      setLoadingPrescribers(true);
-      const response = await fetch('/api/prescribers');
-      if (!response.ok) throw new Error('Erreur lors du chargement des prescripteurs');
-      const data = await response.json();
-      console.log('Prescripteurs chargés:', data);
-      setPrescribers(data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des prescripteurs:', error);
-      message.error('Impossible de charger les prescripteurs');
-    } finally {
-      setLoadingPrescribers(false);
-    }
-  }, [setLoadingPrescribers, setPrescribers, message]);
-
-  // Utiliser les fonctions useCallback dans les useEffect
-  useEffect(() => {
-    fetchDevisNumber();
-  }, [fetchDevisNumber]);
-
-  useEffect(() => {
-    loadClients();
-  }, [loadClients]);
-
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
-
-  useEffect(() => {
-    loadPrescribers();
-  }, [loadPrescribers]);
-
-  useEffect(() => {
-    const loadDevisData = async () => {
+  const loadPrescribers = async () => {
+    let retries = 3;
+    while (retries > 0) {
       try {
-        const pathParts = window.location.pathname.split('/');
-        const devisId = pathParts[pathParts.indexOf('devis') + 1];
-        
-        if (devisId && devisId !== 'new') {
-          setIsLoading(true);
-          setIsEditMode(true);
-
-          // Charger d'abord les données de référence
-          const [catalogsResponse, prescribersResponse] = await Promise.all([
-            fetch('/api/catalogs'),
-            fetch('/api/prescribers')
-          ]);
-
-          const [catalogsData, prescribersData] = await Promise.all([
-            catalogsResponse.json(),
-            prescribersResponse.json()
-          ]);
-
-          setCatalogs(catalogsData);
-          setPrescribers(prescribersData);
-
-          // Charger ensuite les données du devis
-          const devisResponse = await fetch(`/api/devis/${devisId}`);
-          if (!devisResponse.ok) throw new Error('Erreur lors du chargement du devis');
-
-          const devisData = await devisResponse.json();
-          console.log('Données du devis chargées:', devisData);
-
-          // Mise à jour des données de base
-          setDevisNumber({
-            number: devisData.number,
-            year: devisData.year,
-            reference: devisData.reference,
-            prescriberId: devisData.prescriberId
-          });
-
-          // Mise à jour immédiate des sélections
-          setSelectedClient(devisData.clientId);
-          // Supprimer la référence à setSelectedContact
-          // setSelectedContact(devisData.contactId);
-          setSelectedCatalogId(devisData.catalogId);
-          if (devisData.prescriberId) {
-            setSelectedPrescriber(devisData.prescriberId);
-          }
-          setGlobalServiceTVA(devisData.globalServiceTVA);
-          setGlobalMaterialTVA(devisData.globalMaterialTVA);
-          setStatus(devisData.status);
-          setPaymentMethod(devisData.paymentMethod || 'Virement bancaire');
-
-          // Mise à jour de la date d'expiration
-          if (devisData.expirationDate) {
-            const date = new Date(devisData.expirationDate);
-            setExpirationDate(date.toISOString().split('T')[0]);
-          }
-
-          // Mise à jour des sections
-          if (devisData.sections) {
-            const formattedSections = devisData.sections.map((section: any) => ({
-              id: section.id,
-              name: section.name,
-              prestations: section.services.map((service: any) => ({
-                id: service.id,
-                name: service.name,
-                description: service.description || '',
-                quantity: service.quantity,
-                unit: service.unit || 'm²',
-                unitPrice: service.price,
-                tva: service.tva,
-                amount: service.price * service.quantity,
-                materials: service.materials.map(m => ({
-                  id: Math.random().toString(36).substr(2, 9),
-                  name: m.name,
-                  quantity: m.quantity,
-                  price: m.price,
-                  unit: m.unit || 'unité',
-                  reference: m.reference || '',
-                  tva: globalMaterialTVA,
-                  billable: false // Par défaut, le matériau n'est PAS facturable
-                }))
-              })),
-              materialsTotal: section.materialsTotal,
-              subTotal: section.subTotal
-            }));
-
-            setSections(formattedSections);
-            console.log('Sections chargées avec matériaux:', formattedSections);
-          }
+        setLoadingPrescribers(true);
+        const response = await fetch('/api/prescribers');
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Erreur API:', errorData);
+          throw new Error(errorData.error || 'Erreur lors du chargement des prescripteurs');
         }
+        const data = await response.json();
+        setPrescribers(data);
+        return;
       } catch (error) {
-        console.error('Erreur lors du chargement du devis:', error);
-        message.error('Impossible de charger le devis');
+        console.error(`Erreur (tentative ${4 - retries}/3):`, error);
+        retries--;
+        if (retries === 0) {
+          message.error('Impossible de charger les prescripteurs après plusieurs tentatives');
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Attendre 1s avant de réessayer
+        }
       } finally {
-        setIsLoading(false);
+        setLoadingPrescribers(false);
       }
-    };
-
-    loadDevisData();
-  }, []);
-
-  const handleCatalogChange = async (catalogId: string) => {
-    console.log('handleCatalogChange appelé avec catalogId:', catalogId);
-    setSelectedCatalogId(catalogId);
-    setIsLoading(true);
-    
-    try {
-      // Réinitialiser les catégories avant de charger les nouvelles
-      setCatalogCategories([]);
-      setSelectedCategoryForService(null);
-      
-      // Charger les catégories du catalogue
-      const categories = await loadCatalogCategories(catalogId);
-      console.log('Catégories chargées dans handleCatalogChange:', categories);
-      
-      // Vérifier si les catégories ont été chargées correctement
-      if (!categories || categories.length === 0) {
-        console.warn('Aucune catégorie trouvée pour ce catalogue, tentative de rechargement...');
-        // Faire une seconde tentative après un court délai
-        setTimeout(async () => {
-          const retryCategories = await loadCatalogCategories(catalogId);
-          console.log('Résultat de la seconde tentative:', retryCategories);
-        }, 500);
-      }
-      
-      // Utiliser le même endpoint que la page d'édition pour charger les prestations
-      console.log('Envoi de la requête à /api/catalogs/' + catalogId);
-      const response = await fetch(`/api/catalogs/${catalogId}`);
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Réponse API non OK:', response.status, errorData);
-        throw new Error(errorData.error || 'Erreur lors du chargement des prestations');
-      }
-      
-      const catalogData = await response.json();
-      console.log('Données du catalogue chargées (brut):', catalogData);
-      
-      if (!catalogData.categories || !Array.isArray(catalogData.categories)) {
-        console.error('Format de données invalide: pas de catégories ou format incorrect');
-        console.log('Type de catalogData.categories:', typeof catalogData.categories);
-        throw new Error('Format de données invalide');
-      }
-      
-      // Extraire les services de toutes les catégories
-      const formattedPrestations = catalogData.categories.flatMap((category: any) => 
-        category.services.map((service: any) => ({
-          id: service.id,
-          name: service.name,
-          description: service.description,
-          price: service.price,
-          quantity: service.quantity || 1,
-          unit: service.unit || 'm²',
-          materials: service.materials || [],
-          categoryName: category.name,
-          categoryId: category.id
-        }))
-      );
-
-      console.log('Prestations formatées:', formattedPrestations.length);
-      setPrestations(formattedPrestations);
-      
-      // Mettre à jour également les options de prestations pour le Select
-      const options = formattedPrestations.map((prestation: { 
-        id: string; 
-        name: string; 
-        price: number;
-        categoryName: string;
-      }) => ({
-        label: `${prestation.categoryName} - ${prestation.name} - ${prestation.price}€`,
-        value: prestation.id
-      }));
-      
-      console.log('Options de prestations:', options.length);
-      
-    } catch (error) {
-      console.error('Erreur lors du chargement des prestations:', error);
-      message.error('Impossible de charger les prestations du catalogue');
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleSearch = async (value: string) => {
-    console.log('handleSearch appelé avec:', value);
-    setSearchValue(value);
-    setPrestationSearchValue(value);
-    
-    // Si la valeur est vide, ne rien faire
-    if (value.length === 0) {
+  const handleTemplateChange = async (templateId: string) => {
+    if (!templateId) {
+      setSelectedTemplate('');
       return;
     }
 
-    // Si nous avons des prestations, les filtrer selon la recherche
-    if (prestations.length > 0) {
-      console.log('Filtrage des prestations existantes');
-      const filteredPrestations = prestations.filter(prestation =>
-        prestation.name.toLowerCase().includes(value.toLowerCase()) ||
-        (prestation.description?.toLowerCase() || '').includes(value.toLowerCase())
-      );
-      
-      console.log('Prestations filtrées:', filteredPrestations.length);
-    } else {
-      console.log('Aucune prestation disponible pour la recherche');
-    }
-  };
-
-  const prestationOptions: SelectProps['options'] = prestations.map((prestation: { 
-    id: string; 
-    name: string; 
-    price: number;  // Ajout de la propriété price
-    unit?: string;
-  }) => ({
-    label: `${prestation.name} - ${prestation.price}€`,
-    value: prestation.id
-  }));
-
-  const handleAddSection = () => {
-    const newSection: Section = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: 'Nouvelle section',
-      prestations: [],
-      materialsTotal: 0,
-      subTotal: 0,
-      category: { name: '' }
-    };
-    setSections([...sections, newSection]);
-  };
-
-  // 1. Corriger la fonction handleAddPrestation pour gérer correctement les prestations
-  const handleAddPrestation = async (sectionId: string, prestationId: string) => {
     try {
-      // Trouver la prestation dans le catalogue
-      const prestation = prestations.find(p => p.id === prestationId);
-      if (!prestation) {
-        console.error('Prestation non trouvée:', prestationId);
-        return;
+      const response = await fetch(`/api/devis-templates/${templateId}`);
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement du modèle');
       }
-
-      console.log('Prestation sélectionnée:', prestation);
-
-      // Vérifier si la prestation a des matériaux
-      if (!prestation.materials || !Array.isArray(prestation.materials)) {
-        console.warn('La prestation n\'a pas de matériaux ou materials n\'est pas un tableau:', prestation);
-        prestation.materials = []; // Initialiser un tableau vide si undefined
-      }
-
-      // Créer un nouvel ID unique pour la prestation
-      const newPrestationId = Math.random().toString(36).substr(2, 9);
-
-      // Préparer les matériaux avec leurs références
-      const materialsWithReferences = await Promise.all(prestation.materials.map(async (material) => {
-        // Trouver le matériau complet dans availableMaterials pour obtenir sa référence
-        const fullMaterial = availableMaterials.find(m => m.name === material.name);
-        
-        console.log('Matériau trouvé dans le catalogue:', {
-          name: material.name,
-          fullMaterial: fullMaterial
-        });
-
-        // Utiliser la référence du matériau complet ou générer une référence aléatoire
-        const reference = fullMaterial?.reference || `REF-${Math.floor(Math.random() * 10000)}`;
-        
-        return {
-          id: Math.random().toString(36).substr(2, 9),
-          name: material.name,
-          quantity: material.quantity || 1,
-          price: material.price || 0,
-          unit: material.unit || 'unité',
-          reference: reference, // Utiliser la référence trouvée ou générée
-          tva: globalMaterialTVA,
-          billable: false // Ajouter cette propriété
-        };
-      }));
-
-      // Log pour vérifier les matériaux avec références
-      console.log('Matériaux avec références:', materialsWithReferences);
-
-      // Créer la nouvelle prestation avec les matériaux qui ont des références
-      const newPrestation = {
-        id: newPrestationId,
-        name: prestation.name,
-        description: prestation.description || '',
-        quantity: 1,
-        unit: prestation.unit || 'm²',
-        unitPrice: prestation.price,
-        tva: globalServiceTVA,
-        amount: prestation.price,
-        category: { name: prestation.categoryName || '' },
-        materials: materialsWithReferences
-      };
-
-      // Mettre à jour les sections
-      setSections(prevSections => {
-        return prevSections.map(section => {
-          if (section.id === sectionId) {
-            return {
-              ...section,
-              prestations: [...section.prestations, newPrestation]
-            };
-          }
-          return section;
-        });
-      });
-
-      // Réinitialiser la recherche
-      setPrestationSearchValue('');
+      const template = await response.json();
       
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout de la prestation:', error);
-      message.error('Erreur lors de l\'ajout de la prestation');
-    }
-  };
-
-  const handlePrestationQuantityChange = (
-    sectionId: string,
-    prestationId: string,
-    newQuantity: number
-  ) => {
-    // Arrondir à 2 décimales
-    const roundedQuantity = Math.round(newQuantity * 100) / 100;
-    
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                quantity: roundedQuantity,
-                amount: roundedQuantity * prestation.unitPrice
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  const handleMaterialQuantityChange = (
-    sectionId: string,
-    prestationId: string,
-    materialId: string,
-    newQuantity: number
-  ) => {
-    // Arrondir à 2 décimales
-    const roundedQuantity = Math.round(newQuantity * 100) / 100;
-    
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                materials: prestation.materials.map(material => {
-                  if (material.id === materialId) {
-                    return {
-                      ...material,
-                      quantity: roundedQuantity
-                    };
-                  }
-                  return material;
-                })
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  const handlePriceChange = (sectionId: string, prestationId: string, newPrice: number) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                unitPrice: Math.max(0, newPrice), // Empêcher les prix négatifs
-                amount: Math.max(0, newPrice) * prestation.quantity
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  const handleMaterialUnitChange = (
-    sectionId: string,
-    prestationId: string,
-    materialId: string,
-    newUnit: string
-  ) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                materials: prestation.materials.map(material => {
-                  if (material.id === materialId) {
-                    return {
-                      ...material,
-                      unit: newUnit
-                    };
-                  }
-                  return material;
-                })
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  const handleMaterialPriceChange = (
-    sectionId: string,
-    prestationId: string,
-    materialId: string,
-    newPrice: number
-  ) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                materials: prestation.materials.map(material => {
-                  if (material.id === materialId) {
-                    return {
-                      ...material,
-                      price: Math.max(0, newPrice)
-                    };
-                  }
-                  return material;
-                })
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  const handleAddMaterial = (sectionId: string, prestationId: string, materialId: string) => {
-    const material = availableMaterials.find(m => m.id === materialId);
-    if (!material) return;
-
-    // Forcer une référence pour chaque matériau
-    const forcedReference = material.reference || `REF-${Math.floor(Math.random() * 10000)}`;
-    
-    // Log détaillé pour débogage
-    console.log('Ajout de matériau avec référence forcée:', {
-      materialId,
-      materialName: material.name,
-      originalReference: material.reference,
-      forcedReference
-    });
-
-    const newMaterial: Material = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: material.name,
-      quantity: 1,
-      price: material.sellingPrice,
-      unit: material.unit || 'unité',
-      reference: material.reference || '', // Utiliser une chaîne vide comme valeur par défaut
-      tva: globalMaterialTVA,
-      billable: false // Par défaut, le matériau n'est PAS facturable
-    };
-
-    // Mettre à jour les sections avec le nouveau matériau
-    setSections(prevSections => {
-      return prevSections.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            prestations: section.prestations.map(prestation => {
-              if (prestation.id === prestationId) {
-                return {
-                  ...prestation,
-                  materials: [...prestation.materials, newMaterial]
-                };
-              }
-              return prestation;
-            })
-          };
-        }
-        return section;
-      });
-    });
-
-    setMaterialSearchValue('');
-  };
-
-  const handleMaterialReferenceChange = (
-    sectionId: string,
-    prestationId: string,
-    materialId: string,
-    reference: string
-  ) => {
-    console.log('handleMaterialReferenceChange appelé:', {
-      sectionId,
-      prestationId,
-      materialId,
-      reference
-    });
-    
-    setSections(prevSections => {
-      // Créer une copie profonde des sections pour éviter les problèmes de référence
-      const deepCopy = JSON.parse(JSON.stringify(prevSections));
-      
-      const updatedSections = deepCopy.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            prestations: section.prestations.map(prestation => {
-              if (prestation.id === prestationId) {
-                return {
-                  ...prestation,
-                  materials: prestation.materials.map(material => {
-                    if (material.id === materialId) {
-                      console.log('Mise à jour de la référence:', {
-                        materialId,
-                        oldReference: material.reference,
-                        newReference: reference
-                      });
-                      return {
-                        ...material,
-                        reference: reference
-                      };
-                    }
-                    return material;
-                  })
-                };
-              }
-              return prestation;
-            })
-          };
-        }
-        return section;
-      });
-      
-      // Vérifier que la mise à jour a bien été effectuée
-      const updatedSection = updatedSections.find(s => s.id === sectionId);
-      const updatedPrestation = updatedSection?.prestations.find(p => p.id === prestationId);
-      const updatedMaterial = updatedPrestation?.materials.find(m => m.id === materialId);
-      
-      console.log('Résultat de la mise à jour:', {
-        materialId,
-        updatedReference: updatedMaterial?.reference,
-        referenceMatchesInput: updatedMaterial?.reference === reference
-      });
-      
-      return updatedSections;
-    });
-  };
-
-  const calculateTotals = (currentSections: Section[]): Totals => {
-    const servicesByTVA: { [key: number]: { ht: number; tva: number } } = {};
-    const materialsByTVA: { [key: number]: { ht: number; tva: number } } = {};
-
-    // Calculer les totaux pour chaque section sans les mettre à jour
-    const updatedSections = currentSections.map(section => {
-      let sectionMaterialsTotal = 0;
-      let sectionServicesTotal = 0;
-
-      section.prestations.forEach(prestation => {
-        const tauxTVA = prestation.tva;
-        
-        // Calcul pour les services
-        if (!servicesByTVA[tauxTVA]) {
-          servicesByTVA[tauxTVA] = { ht: 0, tva: 0 };
-        }
-        const prestationHT = prestation.quantity * prestation.unitPrice;
-        sectionServicesTotal += prestationHT;
-        servicesByTVA[tauxTVA].ht += prestationHT;
-        servicesByTVA[tauxTVA].tva += prestationHT * (tauxTVA / 100);
-
-        // Calcul pour les matériaux
-        if (!materialsByTVA[tauxTVA]) {
-          materialsByTVA[tauxTVA] = { ht: 0, tva: 0 };
-        }
-        prestation.materials.forEach(material => {
-          const materialHT = material.quantity * material.price;
-          sectionMaterialsTotal += materialHT;
-          materialsByTVA[tauxTVA].ht += materialHT;
-          materialsByTVA[tauxTVA].tva += materialHT * (tauxTVA / 100);
-        });
-      });
-
-      return {
-        ...section,
-        materialsTotal: sectionMaterialsTotal,
-        subTotal: sectionServicesTotal
-      };
-    });
-
-    // Mettre à jour les sections une seule fois, en dehors du calcul des totaux
-    setSections(updatedSections);
-
-    // Calculer les totaux des services
-    const servicesTotals = {
-      totalHT: Object.values(servicesByTVA).reduce((sum, { ht }) => sum + ht, 0),
-      tvaDetails: Object.entries(servicesByTVA).map(([taux, { ht, tva }]) => ({
-        taux: Number(taux),
-        ht,
-        tva
-      }))
-    };
-
-    // Calculer les totaux des matériaux
-    const materialsTotals = {
-      totalHT: Object.values(materialsByTVA).reduce((sum, { ht }) => sum + ht, 0),
-      tvaDetails: Object.entries(materialsByTVA).map(([taux, { ht, tva }]) => ({
-        taux: Number(taux),
-        ht,
-        tva
-      }))
-    };
-
-    // Calculer les totaux globaux
-    const totalHT = servicesTotals.totalHT + materialsTotals.totalHT;
-    const totalTVA = [...servicesTotals.tvaDetails, ...materialsTotals.tvaDetails]
-      .reduce((sum, { tva }) => sum + tva, 0);
-
-    // Créer et retourner l'objet Totals
-    return {
-      totalHT,
-      totalTVA,
-      totalTTC: totalHT + totalTVA,
-      services: servicesTotals,
-      materials: materialsTotals
-    };
-  };
-
-  useEffect(() => {
-    if (sections.length > 0) {
-      const newTotals = calculateTotals([...sections]); // Passer une copie des sections
-      setTotals(newTotals); // Mettre à jour l'état avec les nouveaux totaux
-    }
-  }, [JSON.stringify(sections)]); // Dépendre d'une version stringifiée des sections
-
-  const handleSaveDevis = async (status = 'DRAFT') => {
-    try {
-      setIsLoading(true);
-      
-      // Vérification que devisNumber n'est pas null
-      if (!devisNumber) {
-        message.error('Numéro de devis non disponible');
-        return;
-      }
-
-      // Vérification que le contact est sélectionné
-      if (!selectedClient) {
-        message.error('Veuillez sélectionner un client');
-        return;
-      }
-
-      // Préparer les données du devis
-      const devisData = {
-        status: status,
-        clientId: selectedClient,
-        catalogId: selectedCatalogId,
-        prescriberId: devisNumber.prescriberId,
-        expirationDate: expirationDate,
-        paymentMethod: paymentMethod,
-        pilot: pilot,
-        projectType: projectType,
-        devisComments: devisComments,
-        showDevisComments: showDevisComments,
-        orderFormComments: orderFormComments,
-        showOrderFormComments: showOrderFormComments,
-        showDescriptions: showDescriptions,
-        sections: sections.map(section => ({
-          name: section.name,
-          materialsTotal: section.materialsTotal || 0,
-          subTotal: section.subTotal || 0,
-          category: typeof section.category === 'object' ? section.category.name : 'DEFAULT',
-          // Renommer prestations en services pour correspondre au schéma Prisma
-          services: section.prestations.map(prestation => ({
-            name: prestation.name,
-            quantity: prestation.quantity || 0,
-            unit: prestation.unit || '',
-            price: prestation.unitPrice || 0,
-            tva: prestation.tva || 20,
-            description: prestation.description || '',
-            category: typeof prestation.category === 'object' ? prestation.category.name : 'SERVICE',
-            materials: prestation.materials.map(material => ({
-              name: material.name,
-              quantity: material.quantity || 0,
-              price: material.price || 0,
-              unit: material.unit || '',
-              reference: material.reference || '',
-              tva: material.tva || 20,
-              billable: material.billable !== false
-            }))
+      // Convertir les sections du modèle en format compatible
+      const convertedSections = template.sections.map((section: any) => ({
+        id: section.id,
+        name: section.name,
+        prestations: section.services.map((service: any) => ({
+          id: service.id,
+          name: service.name,
+          quantity: service.quantity,
+          unit: service.unit,
+          unitPrice: service.price,
+          tva: service.tva,
+          amount: service.quantity * service.price,
+          description: service.description,
+          materials: service.materials.map((material: any) => ({
+            id: material.id,
+            name: material.name,
+            quantity: material.quantity,
+            price: material.price,
+            unit: material.unit,
+            reference: material.reference,
+            tva: material.tva,
+            billable: true
           }))
         })),
-      };
+        materialsTotal: 0,
+        subTotal: 0,
+        category: { name: section.name }
+      }));
 
-      // Log détaillé pour débogage
-      console.log('Données complètes à envoyer (JSON):', JSON.stringify(devisData, null, 2));
-
-      // Log des sections et services
-      console.log('Sections à envoyer:', devisData.sections.map((section: any, index: number) => ({
-        index,
-        name: section.name,
-        servicesCount: section.services?.length || 0
-      })));
-
-      // Envoyer les données au serveur
-      const response = await fetch('/api/devis', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(devisData),
-      });
-
-      // Log de la réponse pour débogage
-      console.log('Statut de la réponse:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Erreur détaillée:', errorData);
-        console.error('Statut de la réponse:', response.status);
-        console.error('Données envoyées qui ont causé l\'erreur:', JSON.stringify(devisData, null, 2));
-        throw new Error(`Erreur lors de la sauvegarde du devis: ${errorData.error || response.statusText}`);
-      }
-
-      const result = await response.json();
-      message.success('Devis enregistré avec succès');
-      
-      // Ajouter un petit délai avant la redirection pour s'assurer que les données sont enregistrées
-      setTimeout(() => {
-        router.push('/devis');
-      }, 500);
-      
+      setSections(convertedSections);
+      setSelectedTemplate(templateId);
+      calculateTotals(convertedSections);
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      if (error instanceof Error) {
-        message.error(`Erreur lors de la sauvegarde: ${error.message}`);
-      } else {
-        message.error('Erreur lors de la sauvegarde du devis');
-      }
+      console.error('Erreur:', error);
+      message.error('Impossible de charger le modèle de devis');
     }
   };
 
-  const handleGlobalServiceTVAChange = (newTVA: number) => {
-    setGlobalServiceTVA(newTVA);
-    setSections(sections.map(section => ({
-      ...section,
-      prestations: section.prestations.map(prestation => ({
-        ...prestation,
-        tva: newTVA
-      }))
-    })));
-  };
-
-  const handleGlobalMaterialTVAChange = (newTVA: number) => {
-    setGlobalMaterialTVA(newTVA);
-    setSections(sections.map(section => ({
-      ...section,
-      prestations: section.prestations.map(prestation => ({
-        ...prestation,
-        materials: prestation.materials.map(material => ({
-          ...material,
-          tva: newTVA
-        }))
-      }))
-    })));
-  };
-
-  const renderTotalsFooter = () => {
-    if (!totals) return null;
-
-    console.log('paymentMethod:', paymentMethod);
-
-    return (
-      <div className="mt-8 bg-white border-t shadow-lg p-4">
-        <div className="container mx-auto">
-          <div className="flex justify-between items-center">
-            {/* Boutons d'aperçu et téléchargement */}
-            <div className="flex gap-4">
-              <Button 
-                icon={<EyeOutlined />}
-                onClick={() => setShowSimpleDevisPreview(true)}
-              >
-                Aperçu devis simple
-              </Button>
-              <Button 
-                icon={<EyeOutlined />}
-                onClick={() => setShowDevisWithMaterialsPreview(true)}
-              >
-                Aperçu devis détaillé
-              </Button>
-              <Button 
-                icon={<EyeOutlined />}
-                onClick={() => setShowOrderFormPreview(true)}
-              >
-                Aperçu bon de commande
-              </Button>
-              <Button 
-                icon={<FileTextOutlined />}
-                onClick={() => {
-                  message.info("Veuillez d'abord sauvegarder le devis avant de créer une facture.");
-                }}
-              >
-                Créer une facture
-              </Button>
-            </div>
-
-            {/* Totaux */}
-            <div className="flex items-center gap-8">
-              <div className="text-right">
-                <div className="grid grid-cols-4 gap-4 text-sm">
-                  <div className="text-right font-semibold">Services:</div>
-                  <div>HT {totals.services.totalHT.toFixed(2)} €</div>
-                  {totals.services.tvaDetails.map(({ taux, tva }) => (
-                    <div key={`service-tva-${taux}`}>TVA {taux}% {tva.toFixed(2)} €</div>
-                  ))}
-                  <div>TTC {(totals.services.totalHT + totals.services.tvaDetails.reduce((acc, { tva }) => acc + tva, 0)).toFixed(2)} €</div>
-
-                  <div className="text-right font-semibold">Matériaux:</div>
-                  <div>HT {totals.materials.totalHT.toFixed(2)} €</div>
-                  {totals.materials.tvaDetails.map(({ taux, tva }) => (
-                    <div key={`material-tva-${taux}`}>TVA {taux}% {tva.toFixed(2)} €</div>
-                  ))}
-                  <div>TTC {(totals.materials.totalHT + totals.materials.tvaDetails.reduce((acc, { tva }) => acc + tva, 0)).toFixed(2)} €</div>
-
-                  <div className="text-right font-semibold">Total:</div>
-                  <div>HT {totals.totalHT.toFixed(2)} €</div>
-                  <div>TVA {totals.totalTVA.toFixed(2)} €</div>
-                  <div>TTC {totals.totalTTC.toFixed(2)} €</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const handlePreviewClick = () => {
-    console.log('Date d\'expiration au clic preview:', expirationDate);
-    setShowSimpleDevisPreview(true);
-  };
-
-  const handleTVAChange = (sectionId: string, prestationId: string, newTVA: number) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                tva: newTVA
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  // Ajouter les fonctions de suppression
-  const handleDeleteSection = (sectionId: string) => {
-    setSections(sections.filter(s => s.id !== sectionId));
-    setSectionToDelete(null);
-  };
-
-  const handleDeletePrestation = (sectionId: string, prestationId: string) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.filter(p => p.id !== prestationId)
-        };
-      }
-      return section;
-    }));
-    setPrestationToDelete(null);
-  };
-
-  const handleDeleteMaterial = (sectionId: string, prestationId: string, materialId: string) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                materials: prestation.materials.filter(m => m.id !== materialId)
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-    setMaterialToDelete(null);
-  };
-
-  // Dans le rendu, ajouter un useEffect pour déboguer
-  useEffect(() => {
-    console.log('DevisNumber mis à jour:', devisNumber);
-    // Supprimer la référence à contacts et selectedContact
-  }, [devisNumber]);
-
-  // Ajoutez ce code temporairement pour vérifier les matériaux chargés
-  useEffect(() => {
-    const loadMaterialsWithReferences = async () => {
-      try {
-        const response = await fetch('/api/products?category=MATERIAL');
-        if (!response.ok) throw new Error('Erreur lors du chargement des matériaux');
-        
-        const materials = await response.json();
-        
-        // Vérifier si les matériaux ont des références
-        const materialsWithReferences = materials.filter(m => m.reference && m.reference.trim() !== '');
-        console.log('Matériaux avec références:', materialsWithReferences);
-        console.log('Nombre de matériaux avec références:', materialsWithReferences.length);
-        console.log('Nombre total de matériaux:', materials.length);
-        
-      } catch (error) {
-        console.error('Erreur:', error);
-      }
-    };
-    
-    loadMaterialsWithReferences();
-  }, []);
-
-  // Ajouter une fonction pour gérer le changement d'état de facturation
-  const handleMaterialBillableChange = (
-    sectionId: string,
-    prestationId: string,
-    materialId: string,
-    billable: boolean
-  ) => {
-    setSections(prevSections => {
-      return prevSections.map(section => {
-        if (section.id === sectionId) {
-          return {
-            ...section,
-            prestations: section.prestations.map(prestation => {
-              if (prestation.id === prestationId) {
-                return {
-                  ...prestation,
-                  materials: prestation.materials.map(material => {
-                    if (material.id === materialId) {
-                      return {
-                        ...material,
-                        billable
-                      };
-                    }
-                    return material;
-                  })
-                };
-              }
-              return prestation;
-            })
-          };
-        }
-        return section;
-      });
-    });
-  };
-
-  // Ajouter cette fonction avec les autres gestionnaires d'événements
-  const handleMaterialNameChange = (
-    sectionId: string,
-    prestationId: string,
-    materialId: string,
-    newName: string
-  ) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                materials: prestation.materials.map(material => {
-                  if (material.id === materialId) {
-                    return { ...material, name: newName };
-                  }
-                  return material;
-                })
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  // Ajouter cette fonction avec les autres gestionnaires d'événements
-  const handleMaterialTVAChange = (
-    sectionId: string,
-    prestationId: string,
-    materialId: string,
-    newTVA: number
-  ) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                materials: prestation.materials.map(material => {
-                  if (material.id === materialId) {
-                    return {
-                      ...material,
-                      tva: newTVA
-                    };
-                  }
-                  return material;
-                })
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  // Fonction pour gérer la sélection d'un matériau depuis la liste disponible
-  const handleMaterialSelect = (
-    sectionId: string,
-    prestationId: string,
-    materialId: string,
-    selectedProduct: any
-  ) => {
-    setSections(sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          prestations: section.prestations.map(prestation => {
-            if (prestation.id === prestationId) {
-              return {
-                ...prestation,
-                materials: prestation.materials.map(material => {
-                  if (material.id === materialId) {
-                    return {
-                      ...material,
-                      name: selectedProduct.name,
-                      price: selectedProduct.sellingPrice || selectedProduct.price,
-                      unit: selectedProduct.unit || material.unit,
-                      reference: selectedProduct.reference || '',
-                      tva: selectedProduct.tva || material.tva
-                    };
-                  }
-                  return material;
-                })
-              };
-            }
-            return prestation;
-          })
-        };
-      }
-      return section;
-    }));
-  };
-
-  // Fonction pour déplacer une prestation vers le haut dans une section
-  const handleMovePrestationUp = (sectionId: string, prestationId: string) => {
-    setSections(prevSections => {
-      return prevSections.map(section => {
-        if (section.id === sectionId) {
-          const prestationIndex = section.prestations.findIndex(p => p.id === prestationId);
-          if (prestationIndex > 0) {
-            // Créer une copie du tableau des prestations
-            const updatedPrestations = [...section.prestations];
-            // Échanger la prestation avec celle au-dessus
-            [updatedPrestations[prestationIndex], updatedPrestations[prestationIndex - 1]] = 
-            [updatedPrestations[prestationIndex - 1], updatedPrestations[prestationIndex]];
-            
-            return {
-              ...section,
-              prestations: updatedPrestations
-            };
-          }
-        }
-        return section;
-      });
-    });
-  };
-
-  // Fonction pour déplacer une prestation vers le bas dans une section
-  const handleMovePrestationDown = (sectionId: string, prestationId: string) => {
-    setSections(prevSections => {
-      return prevSections.map(section => {
-        if (section.id === sectionId) {
-          const prestationIndex = section.prestations.findIndex(p => p.id === prestationId);
-          if (prestationIndex < section.prestations.length - 1) {
-            // Créer une copie du tableau des prestations
-            const updatedPrestations = [...section.prestations];
-            // Échanger la prestation avec celle en-dessous
-            [updatedPrestations[prestationIndex], updatedPrestations[prestationIndex + 1]] = 
-            [updatedPrestations[prestationIndex + 1], updatedPrestations[prestationIndex]];
-            
-            return {
-              ...section,
-              prestations: updatedPrestations
-            };
-          }
-        }
-        return section;
-      });
-    });
-  };
-
-  // Ajouter un useEffect pour charger les prestations lorsque le catalogue est sélectionné
+  // Effet pour charger les prestations quand le catalogue est sélectionné
   useEffect(() => {
     if (selectedCatalogId) {
-      console.log('Catalogue sélectionné, chargement des prestations:', selectedCatalogId);
       const loadCatalogPrestations = async () => {
         setIsLoading(true);
         try {
@@ -1728,8 +979,7 @@ export default function NewDevisPage() {
             throw new Error('Erreur lors du chargement du catalogue');
           }
           const catalogData = await response.json();
-          console.log('Données du catalogue chargées dans useEffect:', catalogData);
-
+          
           if (!catalogData.categories || catalogData.categories.length === 0) {
             console.log('Le catalogue ne contient aucune catégorie');
             setPrestations([]);
@@ -1751,10 +1001,10 @@ export default function NewDevisPage() {
             }))
           );
 
-          console.log('Prestations formatées dans useEffect:', formattedPrestations.length);
+          console.log('Prestations formatées:', formattedPrestations.length);
           setPrestations(formattedPrestations);
         } catch (error) {
-          console.error('Erreur lors du chargement des prestations dans useEffect:', error);
+          console.error('Erreur lors du chargement des prestations:', error);
           message.error('Impossible de charger les prestations du catalogue');
         } finally {
           setIsLoading(false);
@@ -1763,7 +1013,6 @@ export default function NewDevisPage() {
 
       loadCatalogPrestations();
     } else {
-      console.log('Aucun catalogue sélectionné dans useEffect');
       setPrestations([]);
     }
   }, [selectedCatalogId]);
@@ -2015,6 +1264,17 @@ export default function NewDevisPage() {
     };
   }, []);
 
+  useEffect(() => {
+    fetchDevisNumber();
+    loadClients();
+    loadCatalogs();
+    loadTemplates();
+  }, []); // Retirer les dépendances qui causent la boucle
+
+  useEffect(() => {
+    loadPrescribers();
+  }, []);
+
   if (loading || catalogsLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -2136,6 +1396,214 @@ export default function NewDevisPage() {
     setIsCatalogSelectorVisible(true);
   };
 
+  const renderTotalsFooter = () => {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex gap-4">
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => setShowSimpleDevisPreview(true)}
+            >
+              Aperçu devis simple
+            </Button>
+            <Button
+              icon={<FileTextOutlined />}
+              onClick={() => setShowDevisWithMaterialsPreview(true)}
+            >
+              Aperçu devis détaillé
+            </Button>
+            <Button
+              icon={<PrinterOutlined />}
+              onClick={() => setShowOrderFormPreview(true)}
+            >
+              Bon de commande
+            </Button>
+            {status === 'ACCEPTED' && (
+              <Button
+                icon={<FileTextOutlined />}
+                onClick={() => setShowCreateInvoiceModal(true)}
+              >
+                Créer facture
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center gap-8">
+            <div className="text-right">
+              <div>Total HT: <span className="font-bold">{totals.totalHT.toFixed(2)} €</span></div>
+              <div>Total TVA: <span className="font-bold">{totals.totalTVA.toFixed(2)} €</span></div>
+              <div>Total TTC: <span className="font-bold">{totals.totalTTC.toFixed(2)} €</span></div>
+            </div>
+            <Button
+              type="primary"
+              onClick={() => handleSaveDevis()}
+              disabled={!selectedClient || sections.length === 0}
+              loading={isLoading}
+            >
+              {isEditMode ? 'Enregistrer les modifications' : 'Créer le devis'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Fonction pour sauvegarder le devis
+  const handleSaveDevis = async () => {
+    try {
+      setIsLoading(true);
+
+      // Vérifier les champs obligatoires
+      if (!selectedClient) {
+        message.error('Veuillez sélectionner un client');
+        return;
+      }
+
+      if (sections.length === 0) {
+        message.error('Veuillez ajouter au moins une section');
+        return;
+      }
+
+      if (!selectedCatalogId) {
+        message.error('Veuillez sélectionner un catalogue');
+        return;
+      }
+
+      // Calculer les totaux finaux
+      const finalTotals = calculateTotals(sections);
+
+      // Préparer les données du devis
+      const devisData = {
+        number: String(devisNumber?.number || '0'),
+        year: devisNumber?.year || new Date().getFullYear(),
+        reference: devisNumber?.reference || '',
+        status: status,
+        clientId: selectedClient,
+        prescriberId: devisNumber?.prescriberId,
+        catalogId: selectedCatalogId,
+        projectType: projectType,
+        pilot: pilot,
+        expirationDate: expirationDate,
+        paymentMethod: paymentMethod,
+        showDescriptions: showDescriptions,
+        showDevisComments: showDevisComments,
+        showOrderFormComments: showOrderFormComments,
+        devisComments: devisComments,
+        orderFormComments: orderFormComments,
+        totalHT: finalTotals.totalHT,
+        totalTTC: finalTotals.totalTTC,
+        tva: finalTotals.totalTVA / finalTotals.totalHT * 100,
+        sections: sections.map(section => ({
+          name: section.name,
+          materialsTotal: section.materialsTotal || 0,
+          subTotal: section.subTotal || 0,
+          category: section.category?.name || 'DEFAULT',
+          services: section.prestations.map(prestation => ({
+            name: prestation.name,
+            quantity: prestation.quantity || 1,
+            unit: prestation.unit || 'm²',
+            price: prestation.unitPrice || 0,
+            tva: prestation.tva || 20,
+            description: prestation.description || '',
+            category: prestation.category?.name || 'SERVICE',
+            materials: prestation.materials.map(material => ({
+              name: material.name,
+              quantity: material.quantity || 1,
+              unit: material.unit || 'u',
+              price: material.price || 0,
+              reference: material.reference || '',
+              tva: material.tva || 20,
+              billable: material.billable !== false
+            }))
+          }))
+        }))
+      };
+
+      console.log('Données envoyées à l\'API:', JSON.stringify(devisData, null, 2));
+
+      // Envoyer les données à l'API
+      const response = await fetch('/api/devis', {
+        method: isEditMode ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(devisData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Erreur API:', errorData);
+        throw new Error(errorData.error || 'Erreur lors de la sauvegarde du devis');
+      }
+
+      const savedDevis = await response.json();
+      
+      message.success(isEditMode ? 'Devis modifié avec succès' : 'Devis créé avec succès');
+      
+      // Rediriger vers la liste des devis après un court délai
+      setTimeout(() => {
+        router.push('/devis');
+      }, 1500);
+
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du devis:', error);
+      message.error('Erreur lors de la sauvegarde du devis');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fonction pour gérer la suppression d'une section
+  const handleDeleteSection = (sectionId: string) => {
+    setSections(prevSections => {
+      const updatedSections = prevSections.filter(section => section.id !== sectionId);
+      // Recalculer les totaux après la suppression
+      calculateTotals(updatedSections);
+      return updatedSections;
+    });
+
+    // Fermer la modale de confirmation
+    setShowDeleteSectionModal(false);
+    setSectionToDelete(null);
+
+    // Afficher un message de confirmation
+    message.success('Section supprimée avec succès');
+  };
+
+  // Fonction pour gérer la suppression d'un matériau
+  const handleDeleteMaterial = (sectionId: string, prestationId: string, materialId: string) => {
+    setSections(prevSections => {
+      const updatedSections = prevSections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            prestations: section.prestations.map(prestation => {
+              if (prestation.id === prestationId) {
+                return {
+                  ...prestation,
+                  materials: prestation.materials.filter(material => material.id !== materialId)
+                };
+              }
+              return prestation;
+            })
+          };
+        }
+        return section;
+      });
+
+      // Recalculer les totaux après la suppression
+      calculateTotals(updatedSections);
+      return updatedSections;
+    });
+
+    // Fermer la modale de confirmation
+    setShowDeleteMaterialModal(false);
+    setMaterialToDelete(null);
+
+    // Afficher un message de confirmation
+    message.success('Matériau supprimé avec succès');
+  };
+
   return (
     <>
       <style jsx global>{`
@@ -2208,6 +1676,23 @@ export default function NewDevisPage() {
                       {PROJECT_TYPES.map(type => (
                         <Select.Option key={type.value} value={type.value}>
                           {type.label}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </div>
+
+                <div>
+                  <Form.Item label="Modèle de devis">
+                    <Select
+                      value={selectedTemplate}
+                      onChange={handleTemplateChange}
+                      placeholder="Sélectionnez un modèle"
+                      allowClear
+                    >
+                      {templates.map(template => (
+                        <Select.Option key={template.id} value={template.id}>
+                          {template.name}
                         </Select.Option>
                       ))}
                     </Select>
@@ -2361,7 +1846,7 @@ export default function NewDevisPage() {
           </div>
 
           {sections.map((section, sectionIndex) => (
-            <div key={`section-${section.id}-${sectionIndex}`} className="mb-4 border rounded-lg overflow-hidden">
+            <div key={`section-${section.id}-${sectionIndex}`} className="mb-4 border rounded-lg overflow-hidden min-w-[1200px]">
               <div className="bg-gray-100 p-4 flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <button
@@ -2404,8 +1889,8 @@ export default function NewDevisPage() {
               </div>
 
               {expandedSections.includes(section.id) && (
-                <div className="p-4">
-                  <table className="w-full">
+                <div className="p-4 overflow-x-auto">
+                  <table className="w-full min-w-[1200px]">
                     <thead>
                       <tr className="text-left">
                         <th className="w-[30%]">Prestation</th>
@@ -2567,15 +2052,15 @@ export default function NewDevisPage() {
                                             <table className="w-full text-sm bg-white border rounded">
                                               <thead>
                                                 <tr className="border-b">
-                                                  <th className="text-left p-2">Nom</th>
-                                                  <th className="text-center p-2">Référence</th>
-                                                  <th className="text-center p-2">Quantité</th>
-                                                  <th className="text-center p-2">Unité</th>
-                                                  <th className="text-right p-2">Prix unitaire</th>
-                                                  <th className="text-center p-2">TVA</th>
-                                                  <th className="text-center p-2">Facturer</th>
-                                                  <th className="text-right p-2">Total</th>
-                                                  <th className="w-10 p-2"></th>
+                                                  <th className="text-left p-2 w-[25%]">Nom</th>
+                                                  <th className="text-center p-2 w-[15%]">Référence</th>
+                                                  <th className="text-center p-2 w-[10%]">Quantité</th>
+                                                  <th className="text-center p-2 w-[10%]">Unité</th>
+                                                  <th className="text-right p-2 w-[10%]">Prix unitaire</th>
+                                                  <th className="text-center p-2 w-[10%]">TVA</th>
+                                                  <th className="text-center p-2 w-[10%]">Facturer</th>
+                                                  <th className="text-right p-2 w-[10%]">Total</th>
+                                                  <th className="w-[5%] p-2"></th>
                                                 </tr>
                                               </thead>
                                               <tbody>
@@ -2698,7 +2183,10 @@ export default function NewDevisPage() {
                                                         </div>
                                                       </td>
                                                       <td className="text-right p-2">
-                                                        {material.billable !== false ? (material.quantity * material.price).toFixed(2) : "0.00"} €
+                                                        <div className="flex items-center justify-end gap-1">
+                                                          {material.billable !== false ? (material.quantity * material.price).toFixed(2) : "0.00"}
+                                                          <span>€</span>
+                                                        </div>
                                                       </td>
                                                       <td className="text-center p-2">
                                                         <button 
@@ -2707,19 +2195,19 @@ export default function NewDevisPage() {
                                                             setMaterialToDelete({ 
                                                               sectionId: section.id, 
                                                               prestationId: prestation.id, 
-                                                              materialId: prestation.id // ou une autre valeur appropriée
+                                                              materialId: material.id
                                                             });
                                                             setShowDeleteMaterialModal(true);
                                                           }}
                                                         >
-                                                          🗑️
+                                                          <DeleteOutlined />
                                                         </button>
                                                       </td>
                                                     </tr>
                                                   );
                                                 })}
                                                 <tr>
-                                                  <td colSpan={6} className="pt-4">
+                                                  <td colSpan={9} className="pt-4">
                                                     <div className="flex items-center gap-2 bg-white border rounded p-2">
                                                       <span className="text-blue-600 text-xl">+</span>
                                                       <Select

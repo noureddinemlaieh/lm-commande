@@ -17,41 +17,65 @@ export async function GET(
         { status: 400 }
       );
     }
-    
-    // Vérifier si le devis existe d'abord
-    const devisExists = await prisma.devis.findUnique({
-      where: { id: params.id },
-      select: { id: true }
-    });
 
-    if (!devisExists) {
-      console.log('Devis non trouvé:', params.id);
-      return NextResponse.json(
-        { error: 'Devis non trouvé' },
-        { status: 404 }
-      );
-    }
-
-    // Récupérer le devis avec toutes ses relations
+    // Récupérer le devis avec toutes ses relations en une seule requête
     const devis = await prisma.devis.findUnique({
       where: { id: params.id },
       include: {
-        client: true,
-        prescriber: true,
-        catalog: true,
+        client: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            address: true,
+            city: true,
+            postalCode: true,
+            company: true
+          }
+        },
+        prescriber: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            company: true
+          }
+        },
+        catalog: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        },
         sections: {
-          orderBy: {
-            order: 'asc'
-          },
-          include: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            materialsTotal: true,
+            subTotal: true,
             services: {
-              orderBy: {
-                order: 'asc'
-              },
-              include: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                quantity: true,
+                price: true,
+                unit: true,
+                tva: true,
+                categoryId: true,
                 materials: {
-                  orderBy: {
-                    order: 'asc'
+                  select: {
+                    id: true,
+                    name: true,
+                    quantity: true,
+                    price: true,
+                    unit: true,
+                    reference: true,
+                    tva: true
                   }
                 }
               }
@@ -61,25 +85,22 @@ export async function GET(
       }
     });
 
-    // Si le devis n'a pas de numéro, générer un numéro temporaire
-    if (devis && !devis.number) {
-      // Utiliser le format "DEVIS-{id}" comme numéro temporaire
-      devis.number = `DEVIS-${devis.id.substring(0, 8)}`;
-      
-      // Optionnel: mettre à jour le numéro dans la base de données
-      await prisma.devis.update({
-        where: { id: params.id },
-        data: { number: devis.number }
-      });
-    }
-
-    // Vérifier que le devis a bien été récupéré
     if (!devis) {
-      console.error('Devis non trouvé après vérification:', params.id);
+      console.log('Devis non trouvé:', params.id);
       return NextResponse.json(
-        { error: 'Devis non trouvé après vérification' },
+        { error: 'Devis non trouvé' },
         { status: 404 }
       );
+    }
+
+    // Si le devis n'a pas de numéro, générer un numéro temporaire
+    if (!devis.number) {
+      const tempNumber = `DEVIS-${devis.id.substring(0, 8)}`;
+      await prisma.devis.update({
+        where: { id: params.id },
+        data: { number: tempNumber }
+      });
+      devis.number = tempNumber;
     }
 
     console.log('Devis récupéré avec succès:', devis.id, 'Numéro:', devis.number);
@@ -228,36 +249,25 @@ export async function PUT(
             data: {
               sectionId: newSection.id,
               name: service.name,
-              quantity: parseInt(service.quantity) || 0,
-              unit: service.unit || "",
+              description: service.description || "",
+              quantity: parseFloat(service.quantity) || 1,
+              unit: service.unit || "m²",
               price: parseFloat(service.price) || 0,
               tva: parseFloat(service.tva) || 20,
-              order: j,
-              description: service.description || "",
-              category: service.category || "SERVICE"
+              catalogId: data.catalogId,
+              categoryId: service.categoryId || null,
+              materials: {
+                create: Array.isArray(service.materials) ? service.materials.map((material: any) => ({
+                  name: material.name,
+                  quantity: parseFloat(material.quantity) || 1,
+                  price: parseFloat(material.price) || 0,
+                  unit: material.unit || "m²",
+                  reference: material.reference || "",
+                  tva: parseFloat(material.tva) || 20
+                })) : []
+              }
             }
           });
-          
-          // Créer les matériaux pour ce service
-          if (service.materials && service.materials.length > 0) {
-            for (let k = 0; k < service.materials.length; k++) {
-              const material = service.materials[k];
-              
-              await prisma.devisMaterial.create({
-                data: {
-                  serviceId: newService.id,
-                  name: material.name,
-                  quantity: parseInt(material.quantity) || 0,
-                  price: parseFloat(material.price) || 0,
-                  unit: material.unit || "",
-                  reference: material.reference || "",
-                  tva: parseFloat(material.tva) || 20,
-                  order: k,
-                  billable: material.billable
-                }
-              });
-            }
-          }
         }
       }
     }
@@ -325,49 +335,59 @@ export async function POST(request: Request) {
     const devis = await prisma.devis.create({
       data: {
         number: data.number,
+        year: new Date().getFullYear(),
         reference: data.reference,
         status: data.status || 'DRAFT',
-        client: { connect: { id: data.clientId } },
-        prescriber: data.prescriberId ? { connect: { id: data.prescriberId } } : undefined,
+        clientId: data.clientId,
+        catalogId: data.catalogId,
+        prescriberId: data.prescriberId,
         expirationDate: data.expirationDate ? new Date(data.expirationDate) : null,
         paymentMethod: data.paymentMethod,
         pilot: data.pilot,
         projectType: data.projectType || 'AUTRE',
-        catalog: data.catalogId ? { connect: { id: data.catalogId } } : { connect: { id: "default-catalog-id" } },
-        totalHT: data.totalHT || 0,
-        totalTTC: data.totalTTC || 0,
+        totalHT: parseFloat(data.totalHT) || 0,
+        totalTTC: parseFloat(data.totalTTC) || 0,
+        tva: parseFloat(data.tva) || 20,
         sections: {
-          create: data.sections.map((section: any) => ({
+          create: Array.isArray(data.sections) ? data.sections.map((section: any) => ({
             name: section.name,
-            materialsTotal: section.materialsTotal,
-            subTotal: section.subTotal,
-            categoryName: section.category?.name || null,
+            materialsTotal: parseFloat(section.materialsTotal) || 0,
+            subTotal: parseFloat(section.subTotal) || 0,
+            category: section.category || "DEFAULT",
             services: {
-              create: section.services.map((service: any) => ({
+              create: Array.isArray(section.services) ? section.services.map((service: any) => ({
                 name: service.name,
-                quantity: service.quantity,
-                unit: service.unit,
-                unitPrice: service.unitPrice,
-                tva: service.tva,
-                amount: service.amount,
-                description: service.description || '',
-                notes: service.notes || '',
-                conditions: service.conditions || '',
-                categoryName: service.category?.name || null,
+                description: service.description || "",
+                quantity: parseFloat(service.quantity) || 1,
+                price: parseFloat(service.price) || 0,
+                unit: service.unit || "m²",
+                tva: parseFloat(service.tva) || 20,
+                catalogId: data.catalogId,
+                categoryId: service.categoryId || null,
                 materials: {
-                  create: service.materials.map((material: any) => ({
+                  create: Array.isArray(service.materials) ? service.materials.map((material: any) => ({
                     name: material.name,
-                    quantity: material.quantity,
-                    price: material.price,
-                    unit: material.unit || '',
-                    reference: material.reference || '',
-                    tva: material.tva,
-                    billable: material.billable
-                  }))
+                    quantity: parseFloat(material.quantity) || 1,
+                    price: parseFloat(material.price) || 0,
+                    unit: material.unit || "m²",
+                    reference: material.reference || "",
+                    tva: parseFloat(material.tva) || 20
+                  })) : []
                 }
-              }))
+              })) : []
             }
-          }))
+          })) : []
+        }
+      },
+      include: {
+        sections: {
+          include: {
+            services: {
+              include: {
+                materials: true
+              }
+            }
+          }
         }
       }
     });

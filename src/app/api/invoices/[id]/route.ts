@@ -21,18 +21,17 @@ export async function GET(
                 prescriber: true,
               },
             },
-          },
-        },
-        sections: {
-          include: {
-            items: {
+            sections: {
               include: {
-                materials: true,
+                services: {
+                  include: {
+                    materials: true,
+                  },
+                },
               },
             },
           },
         },
-        retentionGuarantee: true,
       },
     });
     
@@ -157,50 +156,48 @@ export async function PUT(
                 prescriber: true,
               },
             },
+            sections: {
+              include: {
+                services: {
+                  include: {
+                    materials: true,
+                  },
+                },
+              },
+            },
           },
         },
-        sections: {
-          include: {
-            items: {
-              include: {
-                materials: true
-              }
-            }
-          }
-        }
-      }
+      },
     });
     
     // Si des sections sont fournies, les mettre à jour séparément
     if (sections && Array.isArray(sections)) {
-      // Supprimer toutes les sections existantes
-      await prisma.invoiceSection.deleteMany({
-        where: { invoiceId: params.id }
-      });
-      
-      // Créer les nouvelles sections
+      // Mettre à jour les sections du devis associé
       for (const section of sections) {
         const { items, isDirectMode, ...sectionData } = section;
         
-        const newSection = await prisma.invoiceSection.create({
+        await prisma.devisSection.update({
+          where: { id: sectionData.id },
           data: {
             ...sectionData,
-            invoiceId: params.id,
-            items: {
-              create: items.map((item: any) => {
+            services: {
+              updateMany: items.map((item: any) => {
                 const { materials, ...itemData } = item;
-                
                 return {
-                  ...itemData,
-                  materials: materials && materials.length > 0 ? {
-                    create: materials.map((material: any) => ({
-                      ...material
-                    }))
-                  } : undefined
+                  where: { id: itemData.id },
+                  data: {
+                    ...itemData,
+                    materials: {
+                      updateMany: materials.map((material: any) => ({
+                        where: { id: material.id },
+                        data: material
+                      }))
+                    }
+                  }
                 };
               })
             }
-          },
+          }
         });
       }
     }
@@ -216,19 +213,18 @@ export async function PUT(
                 prescriber: true,
               },
             },
+            sections: {
+              include: {
+                services: {
+                  include: {
+                    materials: true,
+                  },
+                },
+              },
+            },
           },
         },
-        retentionGuarantee: true,
-        sections: {
-          include: {
-            items: {
-              include: {
-                materials: true
-              }
-            }
-          }
-        }
-      }
+      },
     });
     
     return NextResponse.json(finalInvoice);

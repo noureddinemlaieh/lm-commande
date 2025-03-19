@@ -193,7 +193,7 @@ const CatalogPage = () => {
                   <div className="text-lg font-semibold">{catalog.name}</div>
                   <div className="text-gray-500">{catalog.description}</div>
                   <div className="mt-2 text-sm text-gray-400">
-                    {catalog.categories.length} catégorie(s)
+                    {catalog.categories?.length || 0} catégorie(s)
                   </div>
                 </div>
               </div>

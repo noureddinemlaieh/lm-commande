@@ -50,12 +50,25 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const materials = await prisma.catalogMaterial.findMany();
+    const materials = await prisma.devisMaterial.findMany({
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        unit: true,
+        tva: true
+      },
+      distinct: ['name'],
+      orderBy: {
+        name: 'asc'
+      }
+    });
+
     return NextResponse.json(materials);
   } catch (error) {
     console.error('Erreur lors de la récupération des matériaux:', error);
     return NextResponse.json(
-      { error: 'Erreur serveur lors de la récupération des matériaux' },
+      { error: 'Erreur lors de la récupération des matériaux' },
       { status: 500 }
     );
   }

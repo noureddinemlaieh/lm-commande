@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
+const prismaClient = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Création du service
-    const service = await prisma.catalogService.create({
+    const service = await prismaClient.catalogService.create({
       data: {
         name: body.name,
         description: body.description,
@@ -39,12 +40,12 @@ export async function POST(request: Request) {
     if (body.materials && Array.isArray(body.materials)) {
       for (const material of body.materials) {
         // Récupérer les informations du produit
-        const product = await prisma.product.findUnique({
+        const product = await prismaClient.product.findUnique({
           where: { id: material.productId }
         });
 
         if (product) {
-          await prisma.catalogMaterial.create({
+          await prismaClient.catalogMaterial.create({
             data: {
               name: product.name,
               quantity: material.quantity || 1,
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
     }
 
     // Récupérer le service avec ses matériaux
-    const updatedService = await prisma.catalogService.findUnique({
+    const updatedService = await prismaClient.catalogService.findUnique({
       where: { id: service.id },
       include: {
         materials: true
@@ -82,16 +83,26 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const services = await prisma.catalogService.findMany({
-      include: {
-        materials: true
+    const services = await prisma.devisService.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        unit: true,
+        tva: true
+      },
+      distinct: ['name'],
+      orderBy: {
+        name: 'asc'
       }
     });
+
     return NextResponse.json(services);
   } catch (error) {
-    console.error('Erreur lors de la récupération des services:', error);
+    console.error('Erreur lors de la récupération des prestations:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de la récupération des services' },
+      { error: 'Erreur lors de la récupération des prestations' },
       { status: 500 }
     );
   }

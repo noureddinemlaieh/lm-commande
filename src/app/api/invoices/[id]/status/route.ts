@@ -52,14 +52,14 @@ export async function PATCH(
       data: { status: data.status }
     });
     
-    // Enregistrer l'historique du changement de statut (optionnel)
+    // Enregistrer l'historique du changement de statut
     try {
-      await prisma.invoiceStatusHistory.create({
+      await prisma.invoicePaymentHistory.create({
         data: {
           invoiceId: params.id,
-          status: data.status,
-          changedAt: new Date(),
-          changedBy: 'user' // Remplacer par l'ID de l'utilisateur connecté si disponible
+          paymentStatus: 'PENDING',
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       });
     } catch (error) {
